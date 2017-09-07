@@ -1,0 +1,13 @@
+{
+    "endpoint":"https://endpoint.shieldfy.io",
+    "app_key":"",
+    "app_secret":"",
+    "debug"          : false, 
+    "action"         : "block", 
+    "headers"         : { 
+        "X-XSS-Protection"       :  "1; mode=block",
+        "X-Content-Type-Options" :  "nosniff",
+        "X-Frame-Options"        :  "SAMEORIGIN"
+    },
+    "disable"       :  [] 
+}

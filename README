@@ -5,7 +5,7 @@
 ## Installation
 
 ```
-wget -O -q https://raw.githubusercontent.com/shieldfy/shieldfy-php/master/bin/Installer.php - | php --app-key=123456 --app-secret=987654321
+wget https://raw.githubusercontent.com/shieldfy/shieldfy-php/master/bin/Installer.php -O - -q | php -- --app-key=123456789 --app-secret=987654321
 ```
 
 

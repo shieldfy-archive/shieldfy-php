@@ -28,6 +28,11 @@ class Dispatcher implements Exceptionable
         $this->data = $data;
     }
 
+    public function hasData()
+    {
+        return count($this->data);
+    }
+
     public function flush()
     {
         return $this->trigger('activity',$this->data);

@@ -12,7 +12,7 @@ class FileDriver implements CacheInterface
         if (!is_writable($config['path'])) {
             throw new \ErrorException('Permission denied, "'.$config['path'].'" directory must be writable.');
         }
-        $this->path = $config['path'];
+        $this->path = $config['path'] . '/';
         if ($timeout) {
             $this->timeout = $timeout;
         }
@@ -24,7 +24,7 @@ class FileDriver implements CacheInterface
             if ((filemtime($filename) + $this->timeout) > time()) {
                 return true;
             }
-            unlink($filename);
+            @unlink($filename);
         }
         return false;
     }
@@ -32,6 +32,7 @@ class FileDriver implements CacheInterface
     {
         $filename = $this->path.$key.'.json';
         file_put_contents($filename, json_encode($value));
+        $this->clean(); //clean old cache files;
     }
     public function get($key)
     {

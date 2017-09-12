@@ -46,9 +46,9 @@ class CacheManager implements Exceptionable
      * @param array $config
      * @return object
      */
-    public function extendDriver(CacheInterface $driverClass, array $config = [])
+    public function extendDriver(CacheInterface $driverClass, array $driverConfig = [])
     {
-        return new $driverClass($config, self::SESSION_TIMEOUT);
+        return new $driverClass($driverConfig, self::SESSION_TIMEOUT);
     }
 
     /**
@@ -59,13 +59,13 @@ class CacheManager implements Exceptionable
      *
      * @return object $driver
      */
-    public function setDriver($driverType, array $config = [])
+    public function setDriver($driverType, array $driverConfig = [])
     {
         if (!isset($this->drivers[$driverType])) {
             $this->throwException(new CacheDriverNotExistsException('Caching driver not found or supported.', 301));
             $driverType = 'null';
         }
         $driverClass = $this->drivers[$driverType];
-        return new $driverClass($config, self::SESSION_TIMEOUT);
+        return new $driverClass($driverConfig, self::SESSION_TIMEOUT);
     }
 }

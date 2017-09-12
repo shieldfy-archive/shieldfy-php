@@ -15,7 +15,6 @@ class Session implements Exceptionable
     use Exceptioner;
 
     protected $isNew = false;
-    protected $needToFlush = false;
     protected $user;
     protected $request;
     protected $dispatcher;
@@ -60,7 +59,13 @@ class Session implements Exceptionable
             $this->sessionId = $response->sessionId;
             $this->user->setSessionId($response->sessionId);
             $this->user->setScore($response->score);
+            return;
         }
+        //no response for somereason
+        $localSessionId = $this->generateSessionId();
+        $this->sessionId = $localSessionId;
+        $this->user->setSessionId($localSessionId);
+        $this->user->setScore(0);
     }
 
     /**
@@ -73,6 +78,12 @@ class Session implements Exceptionable
         $this->user->setSessionId($user['sessionId']);
         $this->user->setScore($user['score']);
         $this->history = $this->cache->get($this->user->getSessionId());
+    }
+
+    public function generateSessionId()
+    {
+        $pool = '0123456789abcdefghijklmnopqrstuvwxyz';
+        return substr(str_shuffle(str_repeat($pool, 10)), 0, 10);
     }
 
     public function getId()
@@ -96,7 +107,7 @@ class Session implements Exceptionable
             $this->cache->set($this->user->getId(), $this->user->getInfo());
         }
 
-        if ($this->needToFlush) {
+        if ($this->dispatcher->hasData()) {
             // there is need to flush the data to the server
             // data is already waiting at the dispatcher
             $this->dispatcher->flush();
@@ -111,11 +122,6 @@ class Session implements Exceptionable
         $this->history[time()] = $history;
         $this->cache->set($this->user->getSessionId(), $this->history);
         return -1;
-    }
-
-    public function markToFlush()
-    {
-        $this->needToFlush = true;
     }
 
     /**

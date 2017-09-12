@@ -8,46 +8,46 @@ use Shieldfy\Http\Dispatcher;
 use Shieldfy\Collectors\UserCollector;
 use Shieldfy\Collectors\RequestCollector;
 use Shieldfy\Collectors\ExceptionsCollector;
+use Shieldfy\Session;
 
 class Guard
 {
     /**
      * @var Singleton Reference to singleton class instance
      */
-    private static $instance;
+    private static $instance = null;
 
     /**
-     * @var api endpoint
+     * @var Api Endpoint
+     * @var Version
+     * @var Config
+     * @var Dispatcher
+     * @var Cache
+     * @var Collectors
+     * @var Session
      */
     public $endpoint = 'https://api.shieldfy.io';
+    public $version = '3.0.0';
+    public $config = null;
+    public $dispatcher = null;
+    public $cache = null;
+    public $collectors = [];
+    public $session = null;
 
     /**
-     * @var version
-     */
-    public $version = '3.0.0';
-
-    public $config = null;
-
-    public $dispatcher = null;
-
-    public $cache = null;
-
-    public $collectors = [];
-
-
-   /**
      * Initialize Shieldfy guard.
      *
      * @param array $config
      * @param CacheInterface $cache
      * @return object
      */
-    public static function init(array $config, $cache = null)
+    public static function init(array $config = [], $cache = null)
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new self($config, $cache);
+        if (self::$instance !== null) {
+            return self::$instance;
         }
-        return self::$instance;
+
+        self::$instance = new self($config, $cache);
     }
 
     /**
@@ -56,18 +56,22 @@ class Guard
      * @param CacheInterface $cache
      * return initialized guard
      */
-    public function __construct(array $userConfig, CacheInterface $cache = null)
+    private function __construct(array $userConfig, CacheInterface $cache = null)
     {
         //set config container
         $this->config = new Config($userConfig);
 
+        //overwrite the endpoint
+        if(isset($this->config['endpoint'])){
+            $this->endpoint = $this->config['endpoint'];
+        }
         //prepare the cache method if not supplied
         if ($cache === null) {
             //create a new file cache
             $cache = new CacheManager($this->config);
 
             $cache = $cache->setDriver('file', [
-                'path'=> $this->config['rootDir'].'/tmp/',
+                'path'=> $this->config['tmpDir'],
             ]);
         }
 
@@ -81,23 +85,24 @@ class Guard
         $this->startGuard();
     }
 
-    public function startGuard()
+    private function startGuard()
     {
         //starting collectors
-        $collectors = $this->startCollecting();
+        $this->collectors = $this->startCollecting();
         //starting session
+        $this->session = new Session(
+                                $this->collectors['user'],
+                                $this->collectors['request'],
+                                $this->dispatcher,
+                                $this->cache
+                        );
 
-        $session = new Session($collectors['user'],$collectors['request'],$this->dispatcher,$this->cache);
-
-        //$session->save(); //save as step
         //starting monitors
-        
         register_shutdown_function([$this,'flush']);
-
         $this->exposeHeaders();
     }
 
-    public function startCollecting()
+    private function startCollecting()
     {
         $exceptionsCollector = new ExceptionsCollector($this->config);
         $requestCollector = new RequestCollector($_GET, $_POST, $_SERVER, $_COOKIE, $_FILES);
@@ -110,10 +115,9 @@ class Guard
         ];
     }
 
-    public function flush()
+    private function flush()
     {
-        //session sync
-        //echo http_response_code();
+        $this->session->save();
     }
 
     /**
@@ -137,5 +141,9 @@ class Guard
         header('X-Web-Shield: ShieldfyWebShield');
         header('X-Shieldfy-Signature: '.$signature);
     }
+
+    /* singelton protection */
+    protected function __clone(){}
+    protected function __wakeup(){}
         
 }

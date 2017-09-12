@@ -160,7 +160,6 @@ class SessionTest extends TestCase
                                $this->dispatcher, 
                                $this->cache);
         $this->dispatcher->setData(['user'=>'thirduser']);
-        $session->markToFlush();
         $res = $session->save();
         $this->assertEquals(1,$res);
         $sessionId = $session->getId();

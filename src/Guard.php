@@ -60,7 +60,6 @@ class Guard
     {
         //set config container
         $this->config = new Config($userConfig);
-
         //overwrite the endpoint
         if(isset($this->config['endpoint'])){
             $this->endpoint = $this->config['endpoint'];
@@ -145,5 +144,5 @@ class Guard
     /* singelton protection */
     protected function __clone(){}
     protected function __wakeup(){}
-        
+
 }

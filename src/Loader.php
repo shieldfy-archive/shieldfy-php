@@ -15,11 +15,13 @@ class ShieldfyLoader
         if(getenv('SHIELDFY_APP_SECRET')) $this->config['app_secret'] = getenv('SHIELDFY_APP_SECRET');
         if(getenv('SHIELDFY_DEBUG')) $this->config['debug'] = getenv('SHIELDFY_DEBUG');
         if(getenv('SHIELDFY_ACTION')) $this->config['action'] = getenv('SHIELDFY_ACTION');
-
+   
     }
 
     public function load()
     {
+        if($this->config['manual_load'] === false) return; //don't load it developer will loaded it manually
+
         $cache = null; //default
 
         if(isset($this->config['cache']) && is_array($this->config['cache'])){

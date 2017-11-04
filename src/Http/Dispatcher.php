@@ -1,9 +1,11 @@
 <?php
 namespace Shieldfy\Http;
 
+use Shieldfy\Config;
 use Shieldfy\Http\ApiClient;
 use Shieldfy\Exceptions\Exceptioner;
 use Shieldfy\Exceptions\Exceptionable;
+use Shieldfy\Exceptions\EventNotExistsException;
 
 class Dispatcher implements Exceptionable
 {
@@ -12,14 +14,17 @@ class Dispatcher implements Exceptionable
     /**
      * @var supported events list
     */
-    private $events = ['update', 'session', 'activity', 'exception'];
+    private $events = ['update', 'session/start', 'session/step', 'activity', 'exception'];
 
     private $data = [];
 
     public $apiClient = null;
 
-    public function __construct(ApiClient $apiClient)
+    public $config;
+
+    public function __construct(Config $config , ApiClient $apiClient)
     {
+        $this->config = $config;
         $this->apiClient = $apiClient;
     }
 

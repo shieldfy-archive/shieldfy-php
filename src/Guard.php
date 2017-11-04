@@ -2,7 +2,6 @@
 namespace shieldfy;
 
 use Shieldfy\Config;
-use Shieldfy\Cache\CacheManager;
 use Shieldfy\Http\ApiClient;
 use Shieldfy\Http\Dispatcher;
 use Shieldfy\Collectors\UserCollector;
@@ -22,7 +21,6 @@ class Guard
      * @var Version
      * @var Config
      * @var Dispatcher
-     * @var Cache
      * @var Collectors
      * @var Session
      */
@@ -30,7 +28,6 @@ class Guard
     public $version = '3.0.0';
     public $config = null;
     public $dispatcher = null;
-    public $cache = null;
     public $collectors = [];
     public $session = null;
 
@@ -38,52 +35,46 @@ class Guard
      * Initialize Shieldfy guard.
      *
      * @param array $config
-     * @param CacheInterface $cache
      * @return object
      */
-    public static function init(array $config = [], $cache = null)
+    public static function init(array $config = [])
     {
         if (self::$instance !== null) {
             return self::$instance;
         }
 
-        self::$instance = new self($config, $cache);
+        self::$instance = new self($config);
     }
 
     /**
      * Create a new Guard Instance
      * @param array $userConfig
-     * @param CacheInterface $cache
      * return initialized guard
      */
-    private function __construct(array $userConfig, CacheInterface $cache = null)
+    private function __construct(array $userConfig)
     {
+
+        
         //set config container
         $this->config = new Config($userConfig);
+
         //overwrite the endpoint
         if(isset($this->config['endpoint'])){
             $this->endpoint = $this->config['endpoint'];
         }
-        //prepare the cache method if not supplied
-        if ($cache === null) {
-            //create a new file cache
-            $cache = new CacheManager($this->config);
 
-            $cache = $cache->setDriver('file', [
-                'path'=> $this->config['tmpDir'],
-            ]);
-        }
-
-        $this->cache = $cache;
 
         //set Dispatcher
         $apiClient = new ApiClient($this->endpoint, $this->config);
-        $this->dispatcher = new Dispatcher($apiClient);
+        $this->dispatcher = new Dispatcher($this->config, $apiClient);
 
         //start shieldfy guard
         $this->startGuard();
     }
 
+    /**
+     * Starting Guard
+     */
     private function startGuard()
     {
         //starting collectors
@@ -92,8 +83,7 @@ class Guard
         $this->session = new Session(
                                 $this->collectors['user'],
                                 $this->collectors['request'],
-                                $this->dispatcher,
-                                $this->cache
+                                $this->dispatcher
                         );
 
         //starting monitors
@@ -101,22 +91,29 @@ class Guard
         $this->exposeHeaders();
     }
 
+    /**
+     * Start Collecting data needed
+     * @return Array CollectorsBag
+     */  
     private function startCollecting()
     {
-        $exceptionsCollector = new ExceptionsCollector($this->config);
+        //$exceptionsCollector = new ExceptionsCollector($this->config);
         $requestCollector = new RequestCollector($_GET, $_POST, $_SERVER, $_COOKIE, $_FILES);
         $userCollector = new UserCollector($requestCollector);
 
         return [
-            'exceptions' => $exceptionsCollector,
+          //  'exceptions' => $exceptionsCollector,
             'request'    => $requestCollector,
             'user'       => $userCollector
         ];
     }
 
+    /**
+     * flush data to the API
+     */ 
     private function flush()
     {
-        $this->session->save();
+        $this->session->flush();
     }
 
     /**
@@ -127,6 +124,8 @@ class Guard
     {
         if (function_exists('header_remove')) {
             header_remove('x-powered-by');
+        } else {
+            header('x-powered-by: unknown');
         }
 
         foreach ($this->config['headers'] as $header => $value) {

@@ -26,11 +26,37 @@ class Config implements ArrayAccess
     {
         $this->items = array_replace_recursive( $this->getDefaults() , $userConfig);
         $this->getEnvironmentIfAny();
+        $this->loadUserConfig();
     }
 
 
+    public function loadUserConfig()
+    {
+        $stack = debug_backtrace();
+        $firstFrame = $stack[count($stack) - 1];
+        $scriptOriginalRoot = dirname($firstFrame['file']);
+        if(file_exists($scriptOriginalRoot.'/shieldfy.json')){
+            return 1;
+        }else{
+            //go one up
+            $scriptOriginalRootUp = realpath($scriptOriginalRoot.'/..');
+            if(file_exists($scriptOriginalRootUp.'/shieldfy.json')){
+                return 2;
+            }
+        }
+
+        //non exists load default config
+        $defaultConfigFile = __DIR__ .'/config.json';
+        return 3;
+
+    }
+
     public function getDefaults()
     {
+        
+
+        //echo $initialFile.':) :D :D ';
+
          $defaults =  json_decode(file_get_contents( __DIR__ .'/config.json') , TRUE);
          $defaults['rootDir'] = realpath(__DIR__.'/../');
          $defaults['dataDir'] = $defaults['rootDir'].'/src/data';

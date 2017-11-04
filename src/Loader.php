@@ -20,7 +20,7 @@ class ShieldfyLoader
 
     public function load()
     {
-        if($this->config['manual_load'] === false) return; //don't load it developer will loaded it manually
+        //if($this->config['manual_load'] === true) return; //don't load it developer will loaded it manually
 
         $cache = null; //default
 
@@ -36,6 +36,8 @@ class ShieldfyLoader
         Shieldfy\Guard::init($this->config,$cache);
     }
 }
+
+
 
 $shieldfyLoader = new ShieldfyLoader($_SERVER['DOCUMENT_ROOT']);
 $shieldfyLoader->load();

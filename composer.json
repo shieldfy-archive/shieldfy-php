@@ -20,7 +20,8 @@
     ],
     "require": {
         "php" : "~5.5|~7.0",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "shieldfy/normalizer":"1.*"
     },
     "require-dev": {
         "phpunit/phpunit" : "~5.0||~6.0",
@@ -41,8 +42,7 @@
             "Shieldfy\\": "tests"
         }
     },
-    "scripts": {
-        "pre-install-cmd":"@php -r \"echo (extension_loaded('uopz'))?:' --------- Run UOPZ First ---------';\"",
+    "scripts": {        
         "test": "phpunit",
         "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
         "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests"

@@ -3,9 +3,7 @@
     "app_key"           :"",
     "app_secret"        :"",
     "debug"             : false, 
-    "manual_load"       : false,
     "action"            : "block", 
-    "cache"             : "default",
     "headers"           : { 
         "X-XSS-Protection"       :  "1; mode=block",
         "X-Content-Type-Options" :  "nosniff",

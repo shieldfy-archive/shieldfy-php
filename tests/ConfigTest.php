@@ -15,17 +15,7 @@ class ConfigTest extends TestCase
         $this->assertEquals(false,$config['debug']);
     }
 
-    public function testDirectoriesConfig()
-    {
-        $config = new Config([]);
-        $rootDir = realpath(__DIR__.'/../');
-        $this->assertEquals($rootDir,$config['rootDir']);
-        $this->assertEquals($rootDir.'/src/data',$config['dataDir']);
-        $this->assertEquals($rootDir.'/tmp',$config['tmpDir']);
-        $this->assertEquals($rootDir.'/logs',$config['logsDir']);
-        $this->assertEquals(str_replace('/shieldfy/shieldfy-php', '', $rootDir),$config['vendorsDir']);
-
-    }
+    
 
     public function testOverrideDefaults()
     {

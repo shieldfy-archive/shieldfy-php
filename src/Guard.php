@@ -2,12 +2,18 @@
 namespace shieldfy;
 
 use Shieldfy\Config;
+use Shieldfy\Session;
+use Shieldfy\Installer;
 use Shieldfy\Http\ApiClient;
 use Shieldfy\Http\Dispatcher;
+use Shieldfy\Monitors\MonitorsBag;
+use Shieldfy\Callbacks\CallbackHandler;
+use Shieldfy\Collectors\CodeCollector;
 use Shieldfy\Collectors\UserCollector;
 use Shieldfy\Collectors\RequestCollector;
 use Shieldfy\Collectors\ExceptionsCollector;
-use Shieldfy\Session;
+
+
 
 class Guard
 {
@@ -54,7 +60,7 @@ class Guard
     private function __construct(array $userConfig)
     {
 
-        
+        ddb('INIT');
         //set config container
         $this->config = new Config($userConfig);
 
@@ -68,6 +74,17 @@ class Guard
         $apiClient = new ApiClient($this->endpoint, $this->config);
         $this->dispatcher = new Dispatcher($this->config, $apiClient);
 
+        //starting collectors
+        $this->collectors = $this->startCollecting(); 
+
+        //catch callbacks
+        $this->catchCallbacks($this->collectors['request'], $this->config);
+
+        //check the installation
+        if (!$this->isInstalled()) {
+            $install = (new Installer($this->collectors['request'], $this->config))->run();
+        }
+
         //start shieldfy guard
         $this->startGuard();
     }
@@ -77,8 +94,7 @@ class Guard
      */
     private function startGuard()
     {
-        //starting collectors
-        $this->collectors = $this->startCollecting();
+        ddb('Starting Guard');       
         //starting session
         $this->session = new Session(
                                 $this->collectors['user'],
@@ -87,7 +103,14 @@ class Guard
                         );
 
         //starting monitors
+        ddb('Starting Monitors');
+        
+        $monitors = new MonitorsBag($this->config, $this->dispatcher , $this->collectors);
+        $monitors->run();
+
         register_shutdown_function([$this,'flush']);
+
+        //expose essential headers
         $this->exposeHeaders();
     }
 
@@ -97,22 +120,52 @@ class Guard
      */  
     private function startCollecting()
     {
-        //$exceptionsCollector = new ExceptionsCollector($this->config);
+        ddb('Start Collecting');
+
+        //$exceptionsCollector = new ExceptionsCollector($this->config,$this->dispatcher);
         $requestCollector = new RequestCollector($_GET, $_POST, $_SERVER, $_COOKIE, $_FILES);
         $userCollector = new UserCollector($requestCollector);
+        $codeCollector = new CodeCollector($this->config);
 
         return [
-          //  'exceptions' => $exceptionsCollector,
+            //'exceptions' => $exceptionsCollector,
             'request'    => $requestCollector,
-            'user'       => $userCollector
+            'user'       => $userCollector,
+            'code'       => $codeCollector
         ];
+    }
+
+    /**
+     * Catch callbacks from Shieldfy API
+     * @param  RequestCollector $request
+     * @param  Config           $config
+     * @return void
+     */
+    public function catchCallbacks(RequestCollector $request, Config $config)
+    {
+        ddb('Catching Callbacks');
+        //(new CallbackHandler($request, $config))->catchCallback();
+    }
+
+    /**
+     * check if guard installed
+     * @return boolean
+     */
+    public function isInstalled()
+    {
+        
+        if (file_exists($this->config['paths']['data'].'/installed')) {
+            return true;
+        }
+        return false;
     }
 
     /**
      * flush data to the API
      */ 
-    private function flush()
+    public function flush()
     {
+        ddb('Flush');
         $this->session->flush();
     }
 

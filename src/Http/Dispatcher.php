@@ -40,6 +40,7 @@ class Dispatcher implements Exceptionable
 
     public function flush()
     {
+        if(count($this->data) === 0) return;
         return $this->trigger('activity',$this->data);
     }
 

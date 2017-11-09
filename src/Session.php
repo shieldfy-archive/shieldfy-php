@@ -106,13 +106,13 @@ class Session implements Exceptionable
     	if(function_exists('fastcgi_finish_request')) fastcgi_finish_request();
 
         // send the step to the API sever
-
 	    if ($this->dispatcher->hasData()) {
-            // there is threat/warning need to be sent to the server , data is already waiting at the dispatcher queue
+            // there is threat/warning need to be sent to the server , data is already waiting at the dispatcher
             $this->dispatcher->flush();
             return;
         }
 
+        // Trigger Step
         $this->dispatcher->trigger('session/step', [
             'host'	=>	$this->request->getHost(),
             'info' 	=> 	array_merge(
@@ -125,9 +125,27 @@ class Session implements Exceptionable
         ]);
     }
 
+    public function getId()
+    {
+        return $this->sessionId;
+    }
+    
+
     /**
-     *
-     */ 
+     * Set / Read new cache value in Session
+     * @param string $key 
+     * @param string|null $value Optional
+     * @return string|false
+     */
+    public function cache($key , $value = null)
+    {
+        if($value){
+            return $_SESSION[$key] = $value;
+        }
+        return isset($_SESSION[$key])? $_SESSION[$key] : false;
+    }
+
+
     private function _isset($key){
     	return isset($_SESSION[$key]);
     }

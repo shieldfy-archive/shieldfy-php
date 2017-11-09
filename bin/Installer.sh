@@ -16,6 +16,8 @@ cat <<EOF
 EOF
 
 echo -e "\e[0m"
+
+
 # Test if PHP is installed
 php -v > /dev/null 2>&1
 PHP_IS_INSTALLED=$?
@@ -116,6 +118,13 @@ InstallComposer ()
 	php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 	php composer-setup.php
 	php -r "unlink('composer-setup.php');"	
+
+	# check if index.php has vendor autoload or not if not add it
+	VendorExist=$(cat index.php | grep vendor/autoload.php)
+	if [ $VendorExist = '' ]; then
+		echo  "+++ Please Add this line at the top of your Index.php to load composer \n require_once('vendor/autoload.php'); "
+	fi
+
 }
 
 
@@ -133,7 +142,6 @@ AddShieldfy ()
     "app_key"           :"$key",
     "app_secret"        :"$secret",
     "debug"             : false, 
-    "manual_load"       : false,
     "action"            : "block", 
     "cache"             : "default",
     "headers"           : { 
@@ -145,11 +153,11 @@ AddShieldfy ()
 }
 
 EOF
-	# check if index.php has vendor autoload or not if not add it
+	
 
 	#ping the api server
-	echo ">>> Ping Shieldfy API Server"
-
+	#echo ">>> Run the internal PHP installer"
+	#php -f "./vendor/shieldfy/shieldfy-php/bin/Installer.php"
 	echo ">>> Shieldfy adding done"
 }
 

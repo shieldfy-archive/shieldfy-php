@@ -33,14 +33,14 @@ class DispatcherTest extends TestCase
 
     public function testTriggerEvent()
     {
-        $dispatcher = new Dispatcher($this->api);
-        $res = $dispatcher->trigger('session',['user'=>'someuser']);
-        $this->assertEquals(['/session','{"user":"someuser"}'],$res);
+        $dispatcher = new Dispatcher($this->config,$this->api);
+        $res = $dispatcher->trigger('session/start',['user'=>'someuser']);
+        $this->assertEquals(['/session/start','{"user":"someuser"}'],$res);
     }
 
     public function testFlush()
     {
-        $dispatcher = new Dispatcher($this->api);
+        $dispatcher = new Dispatcher($this->config,$this->api);
         $dispatcher->setData(['user'=>'anotheruser']);
         $res = $dispatcher->flush();
         $this->assertEquals(['/activity','{"user":"anotheruser"}'],$res);

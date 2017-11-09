@@ -1,1 +1,4 @@
+vendor
 shieldfy.json
+composer.lock
+composer.json

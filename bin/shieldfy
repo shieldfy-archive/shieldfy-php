@@ -73,9 +73,9 @@ InstallDependecies ()
 	PHPBaseDevPackage='php-dev'
 	PHPAlternativeDevPackage="php$PHP_VERSION_MAJOR.$PHP_VERSION_MINOR-dev"
 
-	#sudo apt-get update
-	#sudo apt-get install -y $PHPBaseDevPackage
-	#sudo apt-get install -y $PHPAlternativeDevPackage
+	sudo apt-get update
+	sudo apt-get install -y $PHPBaseDevPackage
+	sudo apt-get install -y $PHPAlternativeDevPackage
 	sudo apt-get install -y php-pear
 }
 
@@ -125,8 +125,6 @@ InstallUOPZForPHP7 ()
 		rm package.xml
 		rm -r uopz-5.0.2
 	fi
-	#echo "hI"
-	#echo "extension = uopz.so" | sudo tee --append  $PHPINIPATH
 }
 
 InstallUOPZForPHP5 ()
@@ -148,17 +146,11 @@ InstallUOPZForPHP5 ()
 		rm package.xml
 		rm -r uopz-2.0.7
 	fi
-	#sudo echo "extension = uopz.so" >> $PHPINIPATH
 }
 
 
 RestartService ()
 {
-	# restart services
-	# service --status-all | grep php | sed 's/\+//g' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\s\+//g'
-	# service --status-all | grep php | sed 's/[^a-zA-Z0-9\.\-]//g'
-	# service --status-all | grep -o 'php.*'
-
 	if [ $PHPFPM == 0 ]; then
 		echo ">>> Restaring PHP fpm "
 		sudo service $PHPFPM restart
@@ -174,7 +166,6 @@ RestartService ()
 		fi
 		
 	fi
-
 }
 
 AddShieldfy ()
@@ -200,48 +191,11 @@ AddShieldfy ()
 
 EOF
 	
-
-	#ping the api server
-	#echo ">>> Run the internal PHP installer"
-	#php -f "./vendor/shieldfy/shieldfy-php/bin/Installer.php"
-	echo ">>> Shieldfy adding done"
+	echo ">>> Shieldfy adding done :dance:"
 }
 
 Main ()
 {
-
-	echo -e "\e[32m"
-cat <<EOF
-
-
-   _____ _     _      _     _  __       
-  / ____| |   (_)    | |   | |/ _|      
- | (___ | |__  _  ___| | __| | |_ _   _ 
-  \___ \| '_ \| |/ _ \ |/ _  |  _| | | |
-  ____) | | | | |  __/ | (_| | | | |_| |
- |_____/|_| |_|_|\___|_|\__,_|_|  \__, |
-                                   __/ |
-                                  |___/ 
-
-EOF
-
-	echo -e "\e[0m"
-
-	echo ">>> Welcome to Shieldfy Installer"
-	echo ">>> The installer require sudo password for some operations"
-
-	#echo -e "\e[32m"
-	sudo echo -e "\e[32m>>> Begin Install\e[0m"
-	#echo -e "\e[0m"
-
-	# get shieldfy key & secret
-	key=$(php -r "echo @explode(':','$1')[0];")
-	secret=$(php -r "echo @explode(':','$1')[1];")
-	[[ ! $key || ! $secret ]] && { printf "Missing Key & Secret"; exit 0; }
-
-	echo $key
-	echo $secret
-	exit 0;
 
 	# Required Constants & Checks
 
@@ -266,11 +220,40 @@ EOF
 	InstallUOPZ
 
 	#add Shieldfy
-	#AddShieldfy
+	AddShieldfy
 }
 
 
-#run
-#Main
 
-pwd
+echo -e "\e[32m"
+cat <<EOF
+
+
+   _____ _     _      _     _  __       
+  / ____| |   (_)    | |   | |/ _|      
+ | (___ | |__  _  ___| | __| | |_ _   _ 
+  \___ \| '_ \| |/ _ \ |/ _  |  _| | | |
+  ____) | | | | |  __/ | (_| | | | |_| |
+ |_____/|_| |_|_|\___|_|\__,_|_|  \__, |
+                                   __/ |
+                                  |___/ 
+
+EOF
+
+echo -e "\e[0m"
+
+echo ">>> Welcome to Shieldfy Installer"
+echo ">>> The installer require sudo password for some operations"
+
+#echo -e "\e[32m"
+sudo echo -e "\e[32m>>> Begin Install\e[0m"
+#echo -e "\e[0m"
+
+# get shieldfy key & secret
+key=$(php -r "echo @explode(':','$1')[0];")
+secret=$(php -r "echo @explode(':','$1')[1];")
+[[ ! $key || ! $secret ]] && { printf "Missing Key & Secret"; exit 0; }
+
+
+#run Main
+Main

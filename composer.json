@@ -43,7 +43,7 @@
         }
     },
     "bin":[
-        "bin/Installer3.sh"
+        "bin/shieldfy"
     ],
     "scripts": {
         "pre-install-cmd":"bash ./bin/Installer3.sh", 

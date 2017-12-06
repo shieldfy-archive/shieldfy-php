@@ -229,7 +229,7 @@ EOF
 	echo ">>> The installer require sudo password for some operations"
 
 	#echo -e "\e[32m"
-	#sudo echo -e "\e[32m>>> Begin Install\e[0m"
+	sudo echo -e "\e[32m>>> Begin Install\e[0m"
 	#echo -e "\e[0m"
 
 
@@ -257,9 +257,11 @@ EOF
 	InstallUOPZ
 
 	#add Shieldfy
-	AddShieldfy
+	#AddShieldfy
 }
 
 
 #run
-Main
+#Main
+
+pwd

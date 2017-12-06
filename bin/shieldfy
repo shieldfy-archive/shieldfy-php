@@ -73,9 +73,13 @@ InstallDependecies ()
 	PHPBaseDevPackage='php-dev'
 	PHPAlternativeDevPackage="php$PHP_VERSION_MAJOR.$PHP_VERSION_MINOR-dev"
 
+	echo ">>> Updating"
 	sudo apt-get update
-	sudo apt-get install -y $PHPBaseDevPackage
+	echo ">>> Installing Base skip"
+	#sudo apt-get install -y $PHPBaseDevPackage
+	echo ">>> Installing dev $PHPAlternativeDevPackage"
 	sudo apt-get install -y $PHPAlternativeDevPackage
+	echo ">>> Installing dev php-pear"
 	sudo apt-get install -y php-pear
 }
 

@@ -117,7 +117,8 @@ class Installer implements  Exceptionable
     public static function runCli(Event $event)
     {
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-        echo $vendorDir;
+        file_put_contents('x.txt',$vendorDir);
+        file_put_contents(__DIR__.'/x.txt',$vendorDir);
         $extra = $event->getComposer()->getPackage()->getExtra();
         print_r($extra);
         // chmod("tmp/", 0777);

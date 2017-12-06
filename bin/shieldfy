@@ -15,8 +15,7 @@
 
 getPHPINIFile ()
 {
-	service --status-all | grep -o 'php.*' 2>&1
-	PHPFPM_IS_INSTALLED=$?
+	PHPFPM=$(service --status-all | grep -o 'php.*')
 
 	nginx -v > /dev/null 2>&1
 	NGINX_IS_INSTALLED=$?
@@ -79,7 +78,7 @@ InstallDependecies ()
 	#sudo apt-get install -y $PHPBaseDevPackage
 	echo ">>> Installing dev $PHPAlternativeDevPackage"
 	sudo apt-get install -y $PHPAlternativeDevPackage
-	echo ">>> Installing dev php-pear"
+	echo ">>> Installing dev $PHPAlternativeDevPackage"
 	sudo apt-get install -y php-pear
 }
 
@@ -155,7 +154,7 @@ InstallUOPZForPHP5 ()
 
 RestartService ()
 {
-	if [ $PHPFPM == 0 ]; then
+	if [ $PHPFPM ]; then
 		echo ">>> Restaring PHP fpm "
 		sudo service $PHPFPM restart
 	else

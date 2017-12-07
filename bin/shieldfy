@@ -9,17 +9,17 @@ getPHPINIFile ()
 
 	if [ -f "$BasePHPFolder/fpm/php.ini" ];then
 		echo -e "\e[34m>>> Locating php.ini ... PHP INI Path is $BasePHPFolder/fpm/php.ini \e[0m"
-		PHPINIPATH = "$BasePHPFolder/fpm/php.ini"
+		PHPINIPATH="$BasePHPFolder/fpm/php.ini"
 	fi
 
 	if [ -f "$BasePHPFolder/apache2/php.ini" ];then
 		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolder/apache2/php.ini \e[0m"
-		PHPINIPATH = "$BasePHPFolder/apache2/php.ini"
+		PHPINIPATH="$BasePHPFolder/apache2/php.ini"
 	fi
 
 	if [ -f "$BasePHPFolder/php.ini" ]; then
 		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolder/php.ini \e[0m"
-		PHPINIPATH = "$BasePHPFolder/php.ini"
+		PHPINIPATH="$BasePHPFolder/php.ini"
 	fi
 
 }

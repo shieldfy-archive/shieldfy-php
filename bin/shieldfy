@@ -15,7 +15,7 @@
 
 getPHPINIFile ()
 {
-	PHPFPM=$(service --status-all | grep -o 'php.*')
+	PHPFPM_SERVICE=$(service --status-all | grep -o 'php.*')
 
 	nginx -v > /dev/null 2>&1
 	NGINX_IS_INSTALLED=$?
@@ -154,9 +154,9 @@ InstallUOPZForPHP5 ()
 
 RestartService ()
 {
-	if [ $PHPFPM ]; then
+	if [ $PHPFPM_SERVICE ]; then
 		echo ">>> Restaring PHP fpm "
-		sudo service $PHPFPM restart
+		sudo service $PHPFPM_SERVICE restart
 	else
 		echo ">>>  PHP fpm not exists restarting the webserver instead"
 		if [ $NGINX_IS_INSTALLED == 0 ]; then

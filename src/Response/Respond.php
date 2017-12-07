@@ -23,15 +23,15 @@ class Respond
         $this->halt();
     }
 
-    // public function returnBlock($incidentId)
-    // {
-    //     header($this->protocol.' '.self::BLOCKSTATUS.' '.self::BLOCKMESSAGE);
-    //     header('Content-Type: text/html; charset=utf-8');
-    //     header('X-Shieldfy-Status: blocked');
-    //     header('X-Shieldfy-Block-Id: '.$incidentId);
-    //     $response = $this->prepareBlockResponse($incidentId);
-    //     return $response;
-    // }
+    public function returnBlock($incidentId)
+    {
+        header($this->protocol.' '.self::BLOCKSTATUS.' '.self::BLOCKMESSAGE);
+        header('Content-Type: text/html; charset=utf-8');
+        header('X-Shieldfy-Status: blocked');
+        header('X-Shieldfy-Block-Id: '.$incidentId);
+        $response = $this->prepareBlockResponse($incidentId);
+        return $response;
+    }
 
     private function prepareBlockResponse($incidentId)
     {

@@ -5,12 +5,11 @@
 ## Installation
 
 type the command below at your terminal , just replace `appkey` and `appsecret` with your application key and application secret
-```
-bash <(wget -q https://raw.githubusercontent.com/shieldfy/shieldfy-php/master/bin/Installer.sh -O -) appkey:appsecret
-```
+
 
 ```
 composer require shieldfy/shieldfy-php
+bash vendor/bin/shieldfy appkey:appsecret
 ```
 
 ## Running Unit Testing

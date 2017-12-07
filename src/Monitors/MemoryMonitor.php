@@ -3,26 +3,23 @@ namespace Shieldfy\Monitors;
 
 use Shieldfy\Jury\Judge;
 
-class ViewMonitor extends MonitorBase
+class MemoryMonitor extends MonitorBase
 {
     use Judge;
 
-    protected $name = 'view';
+    protected $name = "memory";
+    protected $infected = [];
 
-    protected $vaguePhrases = [
-        '<script>','</script>'
-    ];
-    
     /**
      * run the monitor
      */
     public function run()
     {
-        $request = $this->collectors['request'];
+    	$request = $this->collectors['request'];
         $info = $request->getInfo();
-        $params = array_merge($info['get'], $info['post']);
+        $params = array_merge($info['get'], $info['post'], $info['cookies']);
 
-        $this->issue('view');
+        $this->issue('memory');
 
         $infected = [];
         foreach ($params as $key => $value) {
@@ -44,20 +41,32 @@ class ViewMonitor extends MonitorBase
 
     public function runAnalyzers(Array $infected = [])
     {
+        
         $this->infected = $infected;
-        ob_start(array($this,'deepAnalyze'));        
+
+        $this->listenTo([
+            'unserialize'
+        ],[$this,'analyze']);
     }
 
-    public function deepAnalyze($content)
+    public function analyze()
+    {
+        //echo 'Hello Ya WAD';
+        $arg_list = func_get_args();
+        foreach($arg_list as $arg):
+            //get the final query
+            if(is_string($arg)) $this->deepAnalyze($arg);
+        endforeach;
+        //ddb($arg_list);
+    }
+
+    public function deepAnalyze($query)
     {
         $foundGuilty = false;
         $charge = "";
 
         foreach($this->infected as $infected):
-            if (in_array($infected['value'], $this->vaguePhrases)) {
-                continue;
-            }
-            if (stripos($content, $infected['value']) !== false) {
+            if (stripos($query, $infected['value']) !== false) {
                 $foundGuilty = true;
                 $charge = $infected;
                 break;
@@ -65,10 +74,13 @@ class ViewMonitor extends MonitorBase
         endforeach;
         
         if($foundGuilty){
-            $code = $this->collectors['code']->collectFromText($content, $value);
-            return $this->sendToJail( $this->parseScore($charge['score']), $charge, $code );
+
+            $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS); 
+            $code = $this->collectors['code']->pushStack($stack)->collectFromStack($stack);
+            $this->sendToJail( 'high', $charge, $code );
+            
         }
-        return $content;
+        
     }
 
 }

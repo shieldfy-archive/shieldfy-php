@@ -71,6 +71,7 @@ class ApiClient implements Exceptionable
      */
     public function request($url, $body)
     {
+        //var_dump($this->curl);
         $hash = $this->calculateBodyHash($body);
         $this->setupHeaders(strlen($body), $hash);
 
@@ -88,7 +89,8 @@ class ApiClient implements Exceptionable
 
             return false;
         }
-        $this->close();
+        
+        // $this->close();
 
         $res = $this->parseResult($result);
         if (!$res) {
@@ -107,6 +109,7 @@ class ApiClient implements Exceptionable
      */
     public function parseResult($result)
     {
+       print_r($result);
         $res = json_decode($result);
         if (!$res) {
             $this->errors = [
@@ -116,10 +119,10 @@ class ApiClient implements Exceptionable
 
             return false;
         }
-
+        
         if ($res->status == 'error') {
             $this->errors = [
-                'code'   => $res->code,
+                'code'   => $res->errorCode,
                 'message'=> $res->message,
             ];
 
@@ -196,8 +199,8 @@ class ApiClient implements Exceptionable
     {
         $this->setOpt(CURLOPT_HTTPHEADER,
             [
-                'X-Shieldfy-Api-Key: '.$this->keys['app_key'],
-                'X-Shieldfy-Api-Hash: '.$hash,
+                'Authentication: '.$this->keys['app_key'],
+                'Authorization:Bearer '.$hash,
                 'Content-Type: application/json',
                 'Content-Length: ' . $length
             ]
@@ -213,7 +216,6 @@ class ApiClient implements Exceptionable
      */
     private function calculateBodyHash($body)
     {
-        $body = str_Replace('\\', '', $body); //fix backslash double encoding in json
         return hash_hmac('sha256', $body, $this->keys['app_secret']);
     }
 

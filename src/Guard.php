@@ -60,8 +60,9 @@ class Guard
     private function __construct(array $userConfig)
     {
 
-        ddb('INIT');
+
         //set config container
+        $userConfig['version'] = $this->version;
         $this->config = new Config($userConfig);
 
         //overwrite the endpoint
@@ -82,7 +83,8 @@ class Guard
 
         //check the installation
         if (!$this->isInstalled()) {
-            $install = (new Installer($this->collectors['request'], $this->config))->run();
+            $install = (new Installer($this->collectors['request'], $this->dispatcher, $this->config))->run();
+            
         }
 
         //start shieldfy guard
@@ -94,7 +96,7 @@ class Guard
      */
     private function startGuard()
     {
-        ddb('Starting Guard');       
+       
         //starting session
         $this->session = new Session(
                                 $this->collectors['user'],
@@ -102,16 +104,16 @@ class Guard
                                 $this->dispatcher
                         );
 
-        //starting monitors
-        ddb('Starting Monitors');
         
-        $monitors = new MonitorsBag($this->config, $this->dispatcher , $this->collectors);
-        $monitors->run();
-
         register_shutdown_function([$this,'flush']);
-
+        
         //expose essential headers
         $this->exposeHeaders();
+
+        //starting monitors
+        $monitors = new MonitorsBag($this->config, $this->session, $this->dispatcher , $this->collectors);
+        $monitors->run();
+
     }
 
     /**
@@ -120,15 +122,14 @@ class Guard
      */  
     private function startCollecting()
     {
-        ddb('Start Collecting');
-
-        //$exceptionsCollector = new ExceptionsCollector($this->config,$this->dispatcher);
+       
+        $exceptionsCollector = new ExceptionsCollector($this->config,$this->dispatcher);
         $requestCollector = new RequestCollector($_GET, $_POST, $_SERVER, $_COOKIE, $_FILES);
         $userCollector = new UserCollector($requestCollector);
         $codeCollector = new CodeCollector($this->config);
 
         return [
-            //'exceptions' => $exceptionsCollector,
+            'exceptions' => $exceptionsCollector,
             'request'    => $requestCollector,
             'user'       => $userCollector,
             'code'       => $codeCollector
@@ -143,8 +144,8 @@ class Guard
      */
     public function catchCallbacks(RequestCollector $request, Config $config)
     {
-        ddb('Catching Callbacks');
-        //(new CallbackHandler($request, $config))->catchCallback();
+        
+        (new CallbackHandler($request, $config))->catchCallback();
     }
 
     /**
@@ -165,9 +166,11 @@ class Guard
      */ 
     public function flush()
     {
-        ddb('Flush');
+        echo 'FLushhing';
         $this->session->flush();
     }
+
+
 
     /**
      * Expose useful headers

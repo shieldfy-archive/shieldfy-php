@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 getPHPINIFile ()
 {
 
@@ -28,7 +27,6 @@ getPHPINIFile ()
 	echo -e "\e[31m>>> Locating php.ini ...  Failed \e[0m"
 }
 
-
 InstallDependecies ()
 {
 	PHPBaseDevPackage='php-dev'
@@ -36,8 +34,7 @@ InstallDependecies ()
 
 	echo -e "\e[34m>>> Updating ... \e[0m"
 	sudo apt-get update > /dev/null 2>&1
-	#echo ">>> Installing Base"
-	#sudo apt-get install -y $PHPBaseDevPackage
+
 	echo -e "\e[34m>>> Installing phpdev $PHPAlternativeDevPackage ... \e[0m"
 	sudo apt-get install -y $PHPAlternativeDevPackage > /dev/null 2>&1
 	echo -e "\e[34m>>> Installing phppear ... \e[0m"
@@ -115,7 +112,7 @@ InstallUOPZForPHP5 ()
 	fi
 }
 
-
+# restart required services
 RestartService ()
 {
 	PHPFPM_SERVICE=$(service --status-all | grep -o 'php.*')
@@ -143,11 +140,12 @@ RestartService ()
 	fi
 }
 
+# add shieldfy.json with keys in it
 AddShieldfy ()
 {
 	
 	echo -e "\e[34m>>> Exporting shieldfy configurations (shieldfy.json)\e[0m"
-	# add shieldfy.json with keys in it
+	
 	cat > shieldfy.json << EOF
 {
     "endpoint"          :"https://endpoint.shieldfy.io",
@@ -166,7 +164,6 @@ AddShieldfy ()
 
 EOF
 	
-	#echo -e "\e[34m>>> Shieldfy installation \e[0m \e[5mdone\e[0m :dance: :dance: :dance:"
 	echo -e "\e[40;38;5;82m---------------------------------------\e[0m"
 	echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 done \e[0m"
 	echo -e "\e[40;38;5;82m---------------------------------------\e[0m"
@@ -177,7 +174,6 @@ Main ()
 {
 
 	# Required Constants & Checks
-
 	echo -e "\e[34m>>> Checking PHP Version\e[0m"
 
 	PHP_VERSION_MAJOR=$(php -r "echo explode('.', PHP_VERSION)[0];")
@@ -196,24 +192,6 @@ Main ()
 }
 
 
-
-# echo -e "\e[34m"
-# cat <<EOF
-
-
-#    _____ _     _      _     _  __       
-#   / ____| |   (_)    | |   | |/ _|      
-#  | (___ | |__  _  ___| | __| | |_ _   _ 
-#   \___ \| '_ \| |/ _ \ |/ _  |  _| | | |
-#   ____) | | | | |  __/ | (_| | | | |_| |
-#  |_____/|_| |_|_|\___|_|\__,_|_|  \__, |
-#                                    __/ |
-#                                   |___/ 
-
-# EOF
-
-# echo -e "\e[0m"
-
 echo -e "\e[40;38;5;82m----------------------------------------\e[0m"
 echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 Start \e[0m"
 echo -e "\e[40;38;5;82m----------------------------------------\e[0m"
@@ -221,9 +199,7 @@ echo -e "\e[40;38;5;82m----------------------------------------\e[0m"
 echo -e "\e[34m>>> Welcome to Shieldfy Installer\e[0m"
 echo -e "\e[34m>>> The installer require sudo password for some operations\e[0m"
 
-#echo -e "\e[34m"
 sudo echo -e "\e[34m>>> Begin Install\e[0m"
-#echo -e "\e[0m"
 
 # get shieldfy key & secret
 key=$(php -r "echo @explode(':','$1')[0];")

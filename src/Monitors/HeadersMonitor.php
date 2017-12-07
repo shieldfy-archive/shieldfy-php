@@ -1,22 +1,25 @@
 <?php
 namespace Shieldfy\Monitors;
+
 use Shieldfy\Jury\Judge;
 
-class DBMonitor extends MonitorBase
+class HeadersMonitor extends MonitorBase
 {
-	use Judge;
-    
-    protected $name = "db";
-	protected $infected = [];
+    use Judge;
+
+    protected $name = "headers";
+    protected $infected = [];
 
     /**
      * run the monitor
      */
     public function run()
     {
-    	$this->issue('db');
+        
+        $request = $this->collectors['request'];
+        $this->issue('headers');
 
-    	$request = $this->collectors['request'];
+        $request = $this->collectors['request'];
         $info = $request->getInfo();
         $params = array_merge($info['get'], $info['post']);
 
@@ -25,47 +28,40 @@ class DBMonitor extends MonitorBase
 
             $result = $this->sentence($value);
             if($result['score']){
-            	$result['value'] = $value;
+                $result['value'] = $value;
                 $result['key'] = $key;
-            	$infected[] = $result;
+                $infected[] = $result;
             }
 
         }
 
         if(count($infected) > 0){
-        	//its time to listen
+            //its time to listen
             $this->runAnalyzers($infected);            
         }
 
 
+        
     }
 
     public function runAnalyzers(Array $infected = [])
     {
+        //$this->checkForOr($infected)
         
         $this->infected = $infected;
 
         $this->listenTo([
-            //MYSQL
-            'mysql_query',
-            //MYSQLI
-            'mysqli_query',
-            'mysqli_multi_query',
-            'mysqli_real_query',
-            ['mysqli','query'],
-            ['mysqli','multi_query'],
-            ['mysqli','real_query'],    
-            //PDO
-            ['pdo','exec'],
-            ['pdo','query']
-
+            'header'
         ],[$this,'analyze']);
-
     }
+    
 
     public function analyze()
     {
-    	//echo 'Hello Ya WAD';
+       // echo 'Hello Ya WAD';
+        // $arg_list = func_get_args();
+        // ddb($arg_list);
+        // exit;
         $arg_list = func_get_args();
         foreach($arg_list as $arg):
             //get the final query
@@ -75,13 +71,15 @@ class DBMonitor extends MonitorBase
     }
 
 
-    public function deepAnalyze($query)
+    public function deepAnalyze($arg)
     {
+
         $foundGuilty = false;
         $charge = "";
 
         foreach($this->infected as $infected):
-            if (stripos($query, $infected['value']) !== false) {
+            //echo 'deep'.$arg;echo stripos($arg, $infected['value']);exit;
+            if (stripos($arg, $infected['value']) !== false) {
                 $foundGuilty = true;
                 $charge = $infected;
                 break;
@@ -92,10 +90,11 @@ class DBMonitor extends MonitorBase
 
             $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS); 
             $code = $this->collectors['code']->pushStack($stack)->collectFromStack($stack);
-            $this->sendToJail( $this->parseScore($charge['score']), $charge, $code );
-            
+            // print_r($charge);
+            // print_r($code);
+            //echo $this->parseScore($charge['score']);exit;
+            $this->sendToJail($this->parseScore($charge['score']), $charge , $code);    
         }
-        
     }
-    
+
 }

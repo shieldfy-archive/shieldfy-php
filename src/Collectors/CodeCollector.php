@@ -70,6 +70,11 @@ class CodeCollector implements Collectable
 
 	public function collectFromFile($filePath = '', $line = '')
     {
+        // if(strstr($filePath, 'eval'))
+        // {
+        //     $filePath = preg_replace("/(.*)\([0-9]+\)\s*:\s*eval\(\)\'d\s*code/", '$1', $filePath);
+        // }
+        //echo $filePath;exit;
         if ($filePath && file_exists($filePath)) {
             $content = file($filePath);
             array_unshift($content, 'x');

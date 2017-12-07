@@ -57,6 +57,7 @@ function loadShieldfyWebApplicationFirewall($baseDirectory)
     if(getenv('SHIELDFY_ACTION')) $config['action'] = getenv('SHIELDFY_ACTION');
 
     $config['paths'] = [
+        'base'      => $baseDirectory,
         'root'      =>  realpath(__DIR__.DIRECTORY_SEPARATOR.'..'),
         'src'       =>  __DIR__,
         'data'      =>  __DIR__.DIRECTORY_SEPARATOR.'Data',
@@ -69,8 +70,9 @@ function loadShieldfyWebApplicationFirewall($baseDirectory)
 
 function ddb($x, $exit = false)
 {
-    print_r($x);echo '<br />';
-    if($exit) exit;
+    //print_r($x);echo '<br />';
+    //if($exit) exit;
 }
+
 
 loadShieldfyWebApplicationFirewall(getBaseDirectory());

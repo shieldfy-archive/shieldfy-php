@@ -35,10 +35,6 @@ class Installer implements  Exceptionable
     }
     /**
      * Run installation
-     * 'application_id' => $this->app->id,
-            'https'          => $this->data['https'],
-            'url'            => $this->data['host'],
-            'info'           => json_encode($this->data),
      */
     public function run()
     {
@@ -104,27 +100,4 @@ class Installer implements  Exceptionable
         json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE);
     }
-
-
-
-    /**
-    * Change mode for writable directories within the installation phase
-    * Add shieldfy.json
-    * @return void
-    * composer config extra.shieldfy.appkey hik && composer config extra.shieldfy.appsecret his ;
-    * composer require shieldfy/shieldfy-php
-    */
-    public static function runCli(Event $event)
-    {
-        $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-        file_put_contents('x.txt',$vendorDir);
-        file_put_contents(__DIR__.'/x.txt',$vendorDir);
-        $extra = $event->getComposer()->getPackage()->getExtra();
-        print_r($extra);
-        // chmod("tmp/", 0777);
-        // chmod("tmp/", 0777);
-        // chmod("logs/", 0777);
-    }
-
-
 }

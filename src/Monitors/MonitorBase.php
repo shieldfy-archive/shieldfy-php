@@ -1,41 +1,10 @@
 <?php
-/*
-* User Monitor => Bots , Scanners , Tor , VPNs , Proxies , Bad Reputation ... etc
-* View Monitor => ob_start
-* DB Monitor => listen DB Execution functions (N)
-* Session Monitor =>
-* Request Monitor => CSRF , DOM XSS
-* Upload Monitor => backdoors , XXE
-* DoS Monitor
-* Bruteforce MOnitor
-* API Monitor =>
-* Exception Monitor =>
-* 3rdParty Monitor =>
-* SSRF Monitor => SSRF 
-* RCE Monitoring => Object Injection , Code Injection , Command Injection , Template Injection
-* Headers Monitoring => CRLF , Email Injection
-* Information Disclosure Monitor
-*/
-
-/*
-    * 1.User Monitor => user score ip / bots / etc
-    * 2.Request Monitor => DOM XSS , CSRF
-    * 3.View Monitor => View => XSS , Sensetive info , Open Redirect
-    * 4.DB Monitor => SQLI , NoSQLI
-    * 5.Internal Access Monitor => LFI , SSRF
-    * 6.Code Execution Monitor => Object Injection / Code / Template / Command
-    * 7.Headers Monitor => Email Injection , CRLF , JWT bypasses
-    * 8.Uploads Monitor => Backdoors , XXE
-    * 9.DDos Monitor => DDos
-    * 10.Bruteforce Monitor => brute
-    * 11.Session Monitor => session hijacking / session fixation .. etc
-    * 12.ThirdPartyMonitor => composer.json / package.json / bower.json / crossdomain.xml & other sensetive files
- */
 
 namespace Shieldfy\Monitors;
 
 use Closure;
 use Shieldfy\Config;
+use Shieldfy\Session;
 use Shieldfy\Http\Dispatcher;
 use Shieldfy\Response\Response;
 
@@ -48,15 +17,17 @@ abstract class MonitorBase
      */
     protected $config;
     protected $collectors;
+    protected $session;
     protected $dispatcher;
 
     /**
      * Constructor
      * @param Config $config
      */
-    public function __construct(Config $config, Dispatcher $dispatcher, Array $collectors)
+    public function __construct(Config $config, Session $session, Dispatcher $dispatcher, Array $collectors)
     {
         $this->config = $config;
+        $this->session = $session;
         $this->dispatcher = $dispatcher;
         $this->collectors = $collectors;
         
@@ -140,6 +111,16 @@ abstract class MonitorBase
      *     code block
      * ]
      * 
+     * 
+     *  charge
+     *  [score] => 50
+     *  [rulesIds] => Array
+     *       (
+     *           [0] => 304
+     *       )
+     *
+     *   [value] => http:/google.com
+     *   [key] => get.url
      */
     
     protected function sendToJail($severity = 'low', $charge  = [], $code = [])
@@ -148,6 +129,22 @@ abstract class MonitorBase
         
         //based on severity and config , lets judge it 
         $incidentId = $this->generateIncidentId($this->collectors['user']->getId());
+        
+        
+        //print_r($this->dispatcher->getData());
+
+        if($this->dispatcher->hasData() && $severity  != 'high'){
+            //merge
+            $data = $this->dispatcher->getData();
+            if($data['charge']['key'] == $charge['key'])
+            {
+                //same 
+                $charge['score'] += $data['charge']['score'];
+                $charge['rulesIds'] = array_merge($data['charge']['rulesIds'], $charge['rulesIds']);
+                //recalculate the severity
+                $severity = $this->parseScore($charge['score']);
+            }
+        }
 
         $this->dispatcher->setData([
             'incidentId'        => $incidentId,
@@ -155,21 +152,32 @@ abstract class MonitorBase
             'sessionId'         => $this->session->getId(),
             'user'              => $this->collectors['user']->getInfo(),
             'monitor'           => $this->name,
+            'severity'          => $severity,
             'charge'            => $charge,
             'request'           => $this->collectors['request']->getProtectedInfo(),
             'code'              => $code,
-            'response'          => $this->config['action']
+            'response'          => ($severity == 'high' && $this->config['action'] == 'block') ? 'block' : 'pass'
         ]);
+        //file_put_contents(__DIR__.'/../xxx',print_r($this->dispatcher->getData(),1));
+        
 
         if($severity == 'high' && $this->config['action'] == 'block')
         {
+            if($this->name == 'view') {
+                /* view is special case because it uses ob_start so we need to flush data here */
+                $this->dispatcher->flush();
+                return $this->respond()->returnBlock($incidentId);
+            }
             $this->respond()->block($incidentId);
-        }
-
-
-        
+        }       
         return;
-        
+    }
+
+    protected function parseScore($score = 0)
+    {
+        if($score >= 70) return 'high';
+        if($score >= 40) return 'med';
+        return 'low';
     }
 
 

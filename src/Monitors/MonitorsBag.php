@@ -3,7 +3,7 @@ namespace Shieldfy\Monitors;
 
 use Shieldfy\Config;
 use Shieldfy\Session;
-use Shieldfy\Cache\CacheInterface;
+use Shieldfy\Http\Dispatcher;
 
 class MonitorsBag
 {
@@ -13,19 +13,16 @@ class MonitorsBag
      * 
      */
     private $monitors = [
-
-        // 'UserMonitor'               =>    \Shieldfy\Monitors\UserMonitor::class,
-        // 'DoSMonitor'                =>    \Shieldfy\Monitors\DoSMonitor::class,
-        // 'BruteForceMonitor'         =>    \Shieldfy\Monitors\BruteForceMonitor::class,        
-        // 'RequestMonitor'            =>    \Shieldfy\Monitors\RequestMonitor::class,
-        // 'HeadersMonitor'            =>    \Shieldfy\Monitors\HeadersMonitor::class,
-        // 'UploadMonitor'             =>    \Shieldfy\Monitors\UploadMonitor::class,
-        // 'SessionMonitor'            =>    \Shieldfy\Monitors\ViewMonitor::class,
-         'DBMonitor'                 =>    \Shieldfy\Monitors\DBMonitor::class,
-        // 'InternalAccessMonitor'     =>    \Shieldfy\Monitors\InternalAccessMonitor::class,
-        // 'CodeExecutionMonitor'      =>    \Shieldfy\Monitors\CodeExecutionMonitor::class,
-        // 'ViewMonitor'               =>    \Shieldfy\Monitors\ViewMonitor::class,
-        //'ThridPartyMonitor'       =>    \Shieldfy\Monitors\ViewMonitor::class
+        'UserMonitor'               =>    \Shieldfy\Monitors\UserMonitor::class,
+        'RequestMonitor'            =>    \Shieldfy\Monitors\RequestMonitor::class,
+        'HeadersMonitor'            =>    \Shieldfy\Monitors\HeadersMonitor::class,
+        'UploadMonitor'             =>    \Shieldfy\Monitors\UploadMonitor::class,
+        'DBMonitor'                 =>    \Shieldfy\Monitors\DBMonitor::class,
+        'InternalsMonitor'          =>    \Shieldfy\Monitors\InternalsMonitor::class,
+        'ExecutionMonitor'          =>    \Shieldfy\Monitors\ExecutionMonitor::class,
+        'MemoryMonitor'             =>    \Shieldfy\Monitors\MemoryMonitor::class,
+        'ViewMonitor'               =>    \Shieldfy\Monitors\ViewMonitor::class,
+        'ExceptionsMonitor'          =>    \Shieldfy\Monitors\ExceptionsMonitor::class
     ];
 
     /**
@@ -38,9 +35,11 @@ class MonitorsBag
      * Constructor
      * @param Config $config
      */
-    public function __construct(Config $config, $collectors)
+    public function __construct(Config $config, Session $session, Dispatcher $dispatcher, Array $collectors)
     {
         $this->config = $config;
+        $this->session = $session;
+        $this->dispatcher = $dispatcher;
         $this->collectors = $collectors;
     }
 
@@ -48,7 +47,7 @@ class MonitorsBag
     {
         foreach ($this->monitors as $monitorName => $monitorClass) {
             if (!in_array($monitorName, $this->config['disable'])) {
-                (new $monitorClass($this->config,$this->collectors))->run();
+                (new $monitorClass($this->config, $this->session, $this->dispatcher, $this->collectors))->run();
             }
         }
     }

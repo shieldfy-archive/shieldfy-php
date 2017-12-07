@@ -42,8 +42,10 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = new Dispatcher($this->config,$this->api);
         $dispatcher->setData(['user'=>'anotheruser']);
+        $this->assertEquals(1,$dispatcher->hasData());
+        $this->assertEquals(['user'=>'anotheruser'],$dispatcher->getData());
         $res = $dispatcher->flush();
-        $this->assertEquals(['/activity','{"user":"anotheruser"}'],$res);
+        $this->assertEquals(['/session/threat','{"user":"anotheruser"}'],$res);
     }
 
 }

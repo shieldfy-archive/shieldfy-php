@@ -69,29 +69,21 @@ class UpdateCallback extends Callback implements Dispatchable, Exceptionable
      */
     private function save(array $data = [])
     {
+
+        $data_path = $this->config['paths']['data'];
+        
         $data_path = $this->config['rootDir'].'/data';
         if (!file_exists($data_path.'/installed')) {
             file_put_contents($data_path.'/installed', time());
         }
         file_put_contents($data_path.'/updated', time());
 
-        if (isset($data['upload'])) {
-            file_put_contents($data_path.'/upload.json', $data['upload']);
-        }
-        if (isset($data['request'])) {
-            file_put_contents($data_path.'/request.json', $data['request']);
-        }
-        if (isset($data['api'])) {
-            file_put_contents($data_path.'/api.json', $data['api']);
-        }
-        if (isset($data['exceptions'])) {
-            file_put_contents($data_path.'/exceptions.json', $data['exceptions']);
-        }
-        if (isset($data['query'])) {
-            file_put_contents($data_path.'/query.json', $data['query']);
-        }
-        if (isset($data['view'])) {
-            file_put_contents($data_path.'/view.json', $data['view']);
-        }
+        foreach($data['rules'] as $ruleName => $ruleContent):
+            $content = base64_decode($ruleContent);
+            if($this->isJson($content)){
+                file_put_contents($data_path.'/'.$ruleName.'.json',$content);
+            }            
+        endforeach;
+
     }
 }

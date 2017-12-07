@@ -10,14 +10,15 @@ class UserMonitor extends MonitorBase
      */
     public function run()
     {
-        // $user = $this->collectors['user'];
-        // //report user only on first Session
-        // if (!$this->session->isNewVisit()) {
-        //     return;
-        // }
-        // $score = $user->getScore();
-        // $this->handle([
-        //     'score' => $score
-        // ]);
+        $user = $this->collectors['user'];
+
+        $score = $user->getScore();
+        if($score){
+            $this->sendToJail($this->parseScore($score), $charge  = []);    
+        }
+        
     }
+
+
+    
 }

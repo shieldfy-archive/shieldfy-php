@@ -14,7 +14,7 @@ class Dispatcher implements Exceptionable
     /**
      * @var supported events list
     */
-    private $events = ['update', 'session/start', 'session/step', 'activity', 'exception'];
+    private $events = ['install','update', 'session/start', 'session/step', 'session/threat', 'exception'];
 
     private $data = [];
 
@@ -38,10 +38,15 @@ class Dispatcher implements Exceptionable
         return count($this->data);
     }
 
+    public function getData()
+    {
+        return $this->data;
+    }
+
     public function flush()
     {
         if(count($this->data) === 0) return;
-        return $this->trigger('activity',$this->data);
+        return $this->trigger('session/threat',$this->data);
     }
 
     /**

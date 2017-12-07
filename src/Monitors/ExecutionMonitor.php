@@ -1,42 +1,43 @@
 <?php
 namespace Shieldfy\Monitors;
+
 use Shieldfy\Jury\Judge;
 
-class DBMonitor extends MonitorBase
+class ExecutionMonitor extends MonitorBase
 {
-	use Judge;
-    
-    protected $name = "db";
-	protected $infected = [];
+    use Judge;
+
+    protected $name = "execution";
+    protected $infected = [];
 
     /**
      * run the monitor
      */
     public function run()
     {
-    	$this->issue('db');
-
     	$request = $this->collectors['request'];
         $info = $request->getInfo();
         $params = array_merge($info['get'], $info['post']);
+
+        $this->issue('execution');
 
         $infected = [];
         foreach ($params as $key => $value) {
 
             $result = $this->sentence($value);
             if($result['score']){
-            	$result['value'] = $value;
+                $result['value'] = $value;
                 $result['key'] = $key;
-            	$infected[] = $result;
+                $infected[] = $result;
             }
 
         }
 
         if(count($infected) > 0){
-        	//its time to listen
+            //echo 'xxxxxxxxxxxxxx';
+            //its time to listen
             $this->runAnalyzers($infected);            
         }
-
 
     }
 
@@ -46,26 +47,18 @@ class DBMonitor extends MonitorBase
         $this->infected = $infected;
 
         $this->listenTo([
-            //MYSQL
-            'mysql_query',
-            //MYSQLI
-            'mysqli_query',
-            'mysqli_multi_query',
-            'mysqli_real_query',
-            ['mysqli','query'],
-            ['mysqli','multi_query'],
-            ['mysqli','real_query'],    
-            //PDO
-            ['pdo','exec'],
-            ['pdo','query']
-
+            //'eval',  => eval can't be listen :(
+            'system',
+            'exec',
+            'shell_exec',
+            'passthru',
+            'popen'
         ],[$this,'analyze']);
-
     }
 
     public function analyze()
     {
-    	//echo 'Hello Ya WAD';
+        //echo 'Hello Ya WAD';
         $arg_list = func_get_args();
         foreach($arg_list as $arg):
             //get the final query
@@ -73,7 +66,6 @@ class DBMonitor extends MonitorBase
         endforeach;
         //ddb($arg_list);
     }
-
 
     public function deepAnalyze($query)
     {
@@ -92,10 +84,10 @@ class DBMonitor extends MonitorBase
 
             $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS); 
             $code = $this->collectors['code']->pushStack($stack)->collectFromStack($stack);
-            $this->sendToJail( $this->parseScore($charge['score']), $charge, $code );
+            $this->sendToJail( 'high', $charge, $code );
             
         }
         
     }
-    
+
 }

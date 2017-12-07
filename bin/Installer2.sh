@@ -6,7 +6,7 @@ echo ">>> Welcome to Shieldfy Installer"
 echo ">>> The installer require sudo password for some operations "
 
 sudo echo ">>> Begin Install"
-exit 0
+# exit 0
 # variables
 PHP_VERSION_MAJOR=$(php -r "echo explode('.', PHP_VERSION)[0];")
 PHP_VERSION_MINOR=$(php -r "echo explode('.', PHP_VERSION)[1];")

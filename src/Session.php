@@ -99,14 +99,16 @@ class Session implements Exceptionable
 
     public function flush()
     {
+        
         // there is no need to block the request for sync , we will do this after request is finishing
     	// close session writing to be availabe for next request
     	if(function_exists('session_write_close')) session_write_close();
-    	//finish the request and send the respond to the browser
+    	// //finish the request and send the respond to the browser
     	if(function_exists('fastcgi_finish_request')) fastcgi_finish_request();
-
+        
         // send the step to the API sever
 	    if ($this->dispatcher->hasData()) {
+
             // there is threat/warning need to be sent to the server , data is already waiting at the dispatcher
             $this->dispatcher->flush();
             return;
@@ -114,14 +116,16 @@ class Session implements Exceptionable
 
         // Trigger Step
         $this->dispatcher->trigger('session/step', [
+            'sessionId' => $this->getId(),
             'host'	=>	$this->request->getHost(),
             'info' 	=> 	array_merge(
-                            $this->request->getShortInfo(),
-                            [
-                                'code' => http_response_code(),
-                                'time' => time()
-                            ]
-                        )
+                $this->request->getShortInfo(),
+                [
+                    'code' => http_response_code(),
+                    'time' => time()
+                ]
+            ),
+            'user' => $this->user->getInfo()
         ]);
     }
 

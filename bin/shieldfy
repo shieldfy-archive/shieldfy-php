@@ -8,20 +8,20 @@ getPHPINIFile ()
 	PHPINICLIPATH=$(php --ini | grep -o "/.*/php.ini")
 
 	echo -e "\e[34m>>> Locating Base INI Folder $BasePHPFolder ... \e[0m"
-	if [ -f "$BasePHPFolderfpm/php.ini" ];then
-		echo -e "\e[34m>>> Locating php.ini ... PHP INI Path is $BasePHPFolderfpm/php.ini \e[0m"
+	if [ -f "$BasePHPFolder/fpm/php.ini" ];then
+		echo -e "\e[34m>>> Locating php.ini ... PHP INI Path is $BasePHPFolder/fpm/php.ini \e[0m"
 		PHPINIPATH="$BasePHPFolder/fpm/php.ini"
 		return;
 	fi
 
-	if [ -f "$BasePHPFolderapache2/php.ini" ];then
-		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolderapache2/php.ini \e[0m"
+	if [ -f "$BasePHPFolder/apache2/php.ini" ];then
+		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolder/apache2/php.ini \e[0m"
 		PHPINIPATH="$BasePHPFolder/apache2/php.ini"
 		return;
 	fi
 
-	if [ -f "$BasePHPFolderphp.ini" ]; then
-		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolderphp.ini \e[0m"
+	if [ -f "$BasePHPFolder/php.ini" ]; then
+		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolder/php.ini \e[0m"
 		PHPINIPATH="$BasePHPFolder/php.ini"
 		return;
 	fi

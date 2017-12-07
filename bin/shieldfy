@@ -1,69 +1,27 @@
 #!/bin/bash
 
-# wget http://pecl.php.net/get/uopz-5.0.2.tgz
-# tar -xvf uopz-5.0.2.tgz
-# cd uopz-5.0.2
-# phpize
-# ./configure
-# make
-# make test
-# make install
-
-
-
-# touch /etc/php.d/gearman.ini
 
 getPHPINIFile ()
 {
-	PHPFPM_SERVICE=$(service --status-all | grep -o 'php.*')
-
-	nginx -v > /dev/null 2>&1
-	NGINX_IS_INSTALLED=$?
-
-	apache2 -v > /dev/null 2>&1
-	APACHE_IS_INSTALLED=$?
-
-
-	php-fpm -v > /dev/null 2>&1
-	PHPFPM=$?
-
-	php-fpm7.0 -v > /dev/null 2>&1
-	PHPFMP70=$?
-
-	php-fpm7.1 -v > /dev/null 2>&1
-	PHPFMP71=$?
-
-	php-fpm7.2 -v > /dev/null 2>&1
-	PHPFMP72=$?
-
 
 	BasePHPFolder=$(php --ini | grep -o "/.*/" | head -1)
 	PHPINICLIPATH=$(php --ini | grep -o "/.*/php.ini")
-	PHPINIPATH="/etc/php5/apache2/php.ini"
 
-	if [ $APACHE_IS_INSTALLED == 0 ]; then
-		PHPINIPATH="$BasePHPFolder/apache2/php.ini"
+	if [ -f "$BasePHPFolder/fpm/php.ini" ];then
+		echo -e "\e[34m>>> Locating php.ini ... PHP INI Path is $BasePHPFolder/fpm/php.ini \e[0m"
+		PHPINIPATH = "$BasePHPFolder/fpm/php.ini"
 	fi
 
-	if [[ $PHPFPM == 0 ]]; then
-		echo -e "\e[32m>>> Checking PHP Calling ... PHP Fpm\e[0m"
-		PHPINIPATH=$(php-fpm -i | grep -o "/.*/php.ini")
+	if [ -f "$BasePHPFolder/apache2/php.ini" ];then
+		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolder/apache2/php.ini \e[0m"
+		PHPINIPATH = "$BasePHPFolder/apache2/php.ini"
 	fi
 
-	if [[ $PHPFMP70 == 0 ]]; then
-		echo -e "\e[32m>>> Checking PHP Calling ... PHP Fpm 7.0\e[0m"
-		PHPINIPATH=$(php-fpm7.0 -i | grep -o "/.*/php.ini")
+	if [ -f "$BasePHPFolder/php.ini" ]; then
+		echo -e "\e[34m>>> Locating php.ini ...  PHP INI Path is $BasePHPFolder/php.ini \e[0m"
+		PHPINIPATH = "$BasePHPFolder/php.ini"
 	fi
 
-	if [[ $PHPFMP71 == 0 ]]; then
-		echo -e "\e[32m>>> Checking PHP Calling ... PHP Fpm 7.1\e[0m"
-		PHPINIPATH=$(php-fpm7.1 -i | grep -o "/.*/php.ini")
-	fi
-
-	if [[ $PHPFMP72 == 0 ]]; then
-		echo -e "\e[32m>>> Checking PHP Calling ... PHP Fpm 7.2\e[0m"
-		PHPINIPATH=$(php-fpm7.2 -i | grep -o "/.*/php.ini")
-	fi
 }
 
 
@@ -72,26 +30,26 @@ InstallDependecies ()
 	PHPBaseDevPackage='php-dev'
 	PHPAlternativeDevPackage="php$PHP_VERSION_MAJOR.$PHP_VERSION_MINOR-dev"
 
-	echo ">>> Updating"
-	sudo apt-get update
-	echo ">>> Installing Base skip"
+	echo -e "\e[34m>>> Updating ... \e[0m"
+	sudo apt-get update > /dev/null 2>&1
+	#echo ">>> Installing Base"
 	#sudo apt-get install -y $PHPBaseDevPackage
-	echo ">>> Installing dev $PHPAlternativeDevPackage"
-	sudo apt-get install -y $PHPAlternativeDevPackage
-	echo ">>> Installing dev $PHPAlternativeDevPackage"
-	sudo apt-get install -y php-pear
+	echo -e "\e[34m>>> Installing phpdev $PHPAlternativeDevPackage ... \e[0m"
+	sudo apt-get install -y $PHPAlternativeDevPackage > /dev/null 2>&1
+	echo -e "\e[34m>>> Installing phppear ... \e[0m"
+	sudo apt-get install -y php-pear > /dev/null 2>&1
 }
 
 InstallUOPZ ()
 {
 	UOPZ_IS_INSTALLED=$(php -r "echo (extension_loaded('uopz'))?1:0;")
 
-	if [ $UOPZ_IS_INSTALLED -eq 1 ]; then
-		echo ">>> Check UOPZ installation : OK"
+	if [ $UOPZ_IS_INSTALLED -eq 3 ]; then
+		echo -e "\e[34m>>> Check UOPZ installation ... OK\e[0m"
 		return;
 	else
-		echo ">>> Check UOPZ installation : Not Installed"
-		echo ">>> Installing UOPZ extention ... "
+		echo -e "\e[34m>>> Check UOPZ installation ... Not Installed\e[0m"
+		echo -e "\e[34m>>> Installing UOPZ extention ...\e[0m"
 
 		InstallDependecies
 
@@ -111,9 +69,10 @@ InstallUOPZ ()
 
 InstallUOPZForPHP7 ()
 {
-	echo ">>> Install UOPZ for PHP7"
-	sudo pecl install uopz
+	echo -e "\e[34m>>> Install UOPZ for PHP7\e[0m"
+	sudo pecl install uopz > /dev/null 2>&1
 	if [ $? -ne 0 ]; then
+		echo -e "\e[34m>>> Automatic Install failed , Installing Manually \e[0m"
 	    #failed try compile it from source
 	    wget http://pecl.php.net/get/uopz-5.0.2.tgz
 		tar -xvf uopz-5.0.2.tgz
@@ -132,9 +91,10 @@ InstallUOPZForPHP7 ()
 
 InstallUOPZForPHP5 ()
 {
-	echo ">>> Install UOPZ for PHP5"
-	sudo pecl install uopz-2.0.7
+	echo -e "\e[34m>>> Install UOPZ for PHP5\e[0m"
+	sudo pecl install uopz-2.0.7 > /dev/null 2>&1
 	if [ $? -ne 0 ]; then
+		echo -e "\e[34m>>> Automatic Install failed , Installing Manually \e[0m"
 	    #failed try compile it from source
 	    wget http://pecl.php.net/get/uopz-2.0.7.tgz
 		tar -xvf uopz-2.0.7.tgz
@@ -154,17 +114,25 @@ InstallUOPZForPHP5 ()
 
 RestartService ()
 {
+	PHPFPM_SERVICE=$(service --status-all | grep -o 'php.*')
+
+	nginx -v > /dev/null 2>&1
+	NGINX_IS_INSTALLED=$?
+
+	apache2 -v > /dev/null 2>&1
+	APACHE_IS_INSTALLED=$?
+
 	if [ $PHPFPM_SERVICE ]; then
-		echo ">>> Restaring PHP fpm "
+		echo -e "\e[34m>>> Restaring PHP fpm\e[0m"
 		sudo service $PHPFPM_SERVICE restart
 	else
-		echo ">>>  PHP fpm not exists restarting the webserver instead"
+		echo -e "\e[34m>>>  PHP fpm not exists restarting the webserver instead\e[0m"
 		if [ $NGINX_IS_INSTALLED == 0 ]; then
-			echo ">>> Restaring Nginx "
+			echo -e "\e[34m>>> Restaring Nginx\e[0m"
 			sudo service nginx restart
 		fi
 		if [ $APACHE_IS_INSTALLED == 0 ]; then
-			echo ">>> Restaring Apache "
+			echo -e "\e[34m>>> Restaring Apache\e[0m"
 			sudo service apache2 restart
 		fi
 		
@@ -174,7 +142,7 @@ RestartService ()
 AddShieldfy ()
 {
 	
-	echo ">>> Exporting shieldfy configurations (shieldfy.json)"
+	echo -e "\e[34m>>> Exporting shieldfy configurations (shieldfy.json)\e[0m"
 	# add shieldfy.json with keys in it
 	cat > shieldfy.json << EOF
 {
@@ -194,7 +162,11 @@ AddShieldfy ()
 
 EOF
 	
-	echo ">>> Shieldfy adding done :dance:"
+	#echo -e "\e[34m>>> Shieldfy installation \e[0m \e[5mdone\e[0m :dance: :dance: :dance:"
+	echo -e "\e[40;38;5;82m---------------------------------------\e[0m"
+	echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 done \e[0m"
+	echo -e "\e[40;38;5;82m---------------------------------------\e[0m"
+
 }
 
 Main ()
@@ -202,22 +174,15 @@ Main ()
 
 	# Required Constants & Checks
 
-	echo ">>> Checking PHP Version "
+	echo -e "\e[34m>>> Checking PHP Version\e[0m"
 
 	PHP_VERSION_MAJOR=$(php -r "echo explode('.', PHP_VERSION)[0];")
 	PHP_VERSION_MINOR=$(php -r "echo explode('.', PHP_VERSION)[1];")
 	PHP_VERSION_RELEASE=$(php -r "echo explode('.', PHP_VERSION)[2];")
 
-	echo -e "\e[32m>>> PHP $PHP_VERSION_MAJOR.$PHP_VERSION_MINOR.$PHP_VERSION_RELEASE ... OK\e[0m"
+	echo -e "\e[34m>>> PHP $PHP_VERSION_MAJOR.$PHP_VERSION_MINOR.$PHP_VERSION_RELEASE ... OK\e[0m"
 
 	getPHPINIFile
-	#echo $BasePHPFolder
-	#echo $PHPINIPATH
-	#echo $PHPINICLIPATH
-	#exit 0;
-	
-
-	#try locate php.ini
 
 	# Install UOPZ
 	InstallUOPZ
@@ -228,35 +193,38 @@ Main ()
 
 
 
-echo -e "\e[32m"
-cat <<EOF
+# echo -e "\e[34m"
+# cat <<EOF
 
 
-   _____ _     _      _     _  __       
-  / ____| |   (_)    | |   | |/ _|      
- | (___ | |__  _  ___| | __| | |_ _   _ 
-  \___ \| '_ \| |/ _ \ |/ _  |  _| | | |
-  ____) | | | | |  __/ | (_| | | | |_| |
- |_____/|_| |_|_|\___|_|\__,_|_|  \__, |
-                                   __/ |
-                                  |___/ 
+#    _____ _     _      _     _  __       
+#   / ____| |   (_)    | |   | |/ _|      
+#  | (___ | |__  _  ___| | __| | |_ _   _ 
+#   \___ \| '_ \| |/ _ \ |/ _  |  _| | | |
+#   ____) | | | | |  __/ | (_| | | | |_| |
+#  |_____/|_| |_|_|\___|_|\__,_|_|  \__, |
+#                                    __/ |
+#                                   |___/ 
 
-EOF
+# EOF
 
-echo -e "\e[0m"
+# echo -e "\e[0m"
 
-echo ">>> Welcome to Shieldfy Installer"
-echo ">>> The installer require sudo password for some operations"
+echo -e "\e[40;38;5;82m----------------------------------------\e[0m"
+echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 Start \e[0m"
+echo -e "\e[40;38;5;82m----------------------------------------\e[0m"
 
-#echo -e "\e[32m"
-sudo echo -e "\e[32m>>> Begin Install\e[0m"
+echo -e "\e[34m>>> Welcome to Shieldfy Installer\e[0m"
+echo -e "\e[34m>>> The installer require sudo password for some operations\e[0m"
+
+#echo -e "\e[34m"
+sudo echo -e "\e[34m>>> Begin Install\e[0m"
 #echo -e "\e[0m"
 
 # get shieldfy key & secret
 key=$(php -r "echo @explode(':','$1')[0];")
 secret=$(php -r "echo @explode(':','$1')[1];")
-[[ ! $key || ! $secret ]] && { printf "Missing Key & Secret"; exit 0; }
-
+[[ ! $key || ! $secret ]] && { echo -e "\e[41m\e[97m\tMissing Key & Secret\t\t\e[0m"; exit 0; }
 
 #run Main
 Main

@@ -197,7 +197,8 @@ echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 Start \e[0m"
 echo -e "\e[40;38;5;82m----------------------------------------\e[0m"
 
 echo -e "\e[34m>>> Welcome to Shieldfy Installer\e[0m"
-echo -e "\e[34m>>> The installer require sudo password for some operations\e[0m"
+echo -e "\e[34m>>> The installer require sudo password for following operations \e[0m"
+echo -e "\e[34m>>> ( Installtion of UOPZ package required for code monitoring  ) \e[0m"
 
 sudo echo -e "\e[34m>>> Begin Install\e[0m"
 

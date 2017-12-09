@@ -9,7 +9,7 @@ type the command below at your terminal , just replace `appkey` and `appsecret` 
 
 ```
 composer require shieldfy/shieldfy-php
-bash vendor/bin/shieldfy appkey:appsecret
+bash vendor/bin/shieldfy-installer appkey:appsecret
 ```
 
 ## Running Unit Testing

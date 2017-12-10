@@ -164,9 +164,10 @@ AddShieldfy ()
 
 EOF
 	
-	echo -e "\e[40;38;5;82m---------------------------------------\e[0m"
-	echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 done \e[0m"
-	echo -e "\e[40;38;5;82m---------------------------------------\e[0m"
+	echo -e "\e[40;38;5;82m------------------------------------------\e[0m"
+	echo -e "\e[40;38;5;82m>>> Shieldfy installation  \u2705 done    \e[0m"
+	echo -e "\e[40;38;5;82m>>> Go to the dashboard https://app.shieldfy.io"
+	echo -e "\e[40;38;5;82m------------------------------------------\e[0m"
 
 }
 

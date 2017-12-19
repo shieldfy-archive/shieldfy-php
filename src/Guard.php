@@ -166,7 +166,6 @@ class Guard
      */ 
     public function flush()
     {
-        echo 'FLushhing';
         $this->session->flush();
     }
 

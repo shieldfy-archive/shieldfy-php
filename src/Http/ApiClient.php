@@ -187,7 +187,7 @@ class ApiClient implements Exceptionable
     {
         $this->setOpt(CURLOPT_SSL_VERIFYPEER, true);
         $this->setOpt(CURLOPT_SSL_VERIFYHOST, 2);
-        $this->setOpt(CURLOPT_CAINFO, $this->config['rootDir'].'/src/Http/certificate/cacert.pem');
+        $this->setOpt(CURLOPT_CAINFO, __DIR__.'/certificate/cacert.pem');
     }
 
     /**

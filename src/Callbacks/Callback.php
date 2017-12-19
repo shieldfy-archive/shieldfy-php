@@ -6,7 +6,6 @@ use Shieldfy\Config;
 abstract class Callback
 {
     protected $config;
-    protected $cache;
 
     public function __construct(Config $config)
     {

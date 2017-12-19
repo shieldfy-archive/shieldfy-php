@@ -10,7 +10,6 @@ class CallbackHandler
     use Response;
     protected $request;
     protected $config;
-    protected $cache;
 
     protected $callbacks = [
         'health' => \Shieldfy\Callbacks\HealthCheckCallback::class,

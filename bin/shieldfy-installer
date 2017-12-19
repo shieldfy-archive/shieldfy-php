@@ -148,7 +148,7 @@ AddShieldfy ()
 	
 	cat > shieldfy.json << EOF
 {
-    "endpoint"          :"https://endpoint.shieldfy.io",
+    "endpoint"          :"https://api.shieldfy.io/v1",
     "app_key"           :"$key",
     "app_secret"        :"$secret",
     "debug"             : false, 

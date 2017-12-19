@@ -30,7 +30,7 @@ class Guard
      * @var Collectors
      * @var Session
      */
-    public $endpoint = 'https://api.shieldfy.io';
+    public $endpoint = 'https://api.shieldfy.io/v1';
     public $version = '3.0.0';
     public $config = null;
     public $dispatcher = null;

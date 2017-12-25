@@ -51,13 +51,11 @@ class MemoryMonitor extends MonitorBase
 
     public function analyze()
     {
-        //echo 'Hello Ya WAD';
         $arg_list = func_get_args();
         foreach($arg_list as $arg):
             //get the final query
             if(is_string($arg)) $this->deepAnalyze($arg);
         endforeach;
-        //ddb($arg_list);
     }
 
     public function deepAnalyze($query)

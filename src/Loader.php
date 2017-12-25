@@ -68,11 +68,4 @@ function loadShieldfyWebApplicationFirewall($baseDirectory)
     Shieldfy\Guard::init($config);
 }
 
-function ddb($x, $exit = false)
-{
-    //print_r($x);echo '<br />';
-    //if($exit) exit;
-}
-
-
 loadShieldfyWebApplicationFirewall(getBaseDirectory());

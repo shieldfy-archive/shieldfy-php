@@ -1,0 +1,227 @@
+#!/bin/bash
+
+getPHPINIFile ()
+{
+
+	BasePHPFolder=$(php --ini | grep -o "/.*/" | head -1)
+	PHPINICLIPATH=$(php --ini | grep -o "/.*/php.ini")
+
+	echo -e "[25%] \e[32m> Locating Base INI Folder $BasePHPFolder ... \e[0m"
+	if [ -f "$BasePHPFolder/fpm/php.ini" ];then
+		echo -e "[30%] \e[32m> Locating php.ini ... PHP INI Path is $BasePHPFolder/fpm/php.ini \e[0m"
+		PHPINIPATH="$BasePHPFolder/fpm/php.ini"
+		return;
+	fi
+
+	if [ -f "$BasePHPFolder/apache2/php.ini" ];then
+		echo -e "[30%] \e[32m> Locating php.ini ...  PHP INI Path is $BasePHPFolder/apache2/php.ini \e[0m"
+		PHPINIPATH="$BasePHPFolder/apache2/php.ini"
+		return;
+	fi
+
+	if [ -f "$BasePHPFolder/php.ini" ]; then
+		echo -e "[30%] \e[32m> Locating php.ini ...  PHP INI Path is $BasePHPFolder/php.ini \e[0m"
+		PHPINIPATH="$BasePHPFolder/php.ini"
+		return;
+	fi
+	echo -e "[30%] \e[31m> Locating php.ini ...  Failed \e[0m"
+}
+
+
+InstallDependecies ()
+{
+	echo -e "[32%] \e[32m> Installing System Dependecies ... \e[0m"
+	PHPBaseDevPackage='php-dev'
+	PHPAlternativeDevPackage="php$PHP_VERSION_MAJOR.$PHP_VERSION_MINOR-dev"
+
+	echo -e "[35%] \e[32m> Updating ... \e[0m"
+	sudo apt-get update > /dev/null 2>&1
+
+	echo -e "[43%] \e[32m> Installing phpdev $PHPAlternativeDevPackage ... \e[0m"
+	sudo apt-get install -y $PHPAlternativeDevPackage > /dev/null 2>&1
+	echo -e "[50%] \e[32m> Installing phppear ... \e[0m"
+	sudo apt-get install -y php-pear > /dev/null 2>&1
+}
+
+InstallUOPZ ()
+{
+
+	echo -e "[55%] \e[32m> Installing UOPZ extention ...\e[0m"
+
+	# InstallDependecies
+
+	if [ $PHP_VERSION_MAJOR -eq 7 ]; then
+		InstallUOPZForPHP7
+	else
+		InstallUOPZForPHP5
+	fi
+
+	echo -e "[63%] \e[32m> Adding UOPZ extention to main PHP.ini ($PHPINIPATH) ...\e[0m"
+	echo "extension = uopz.so" | sudo tee --append  $PHPINIPATH
+	echo -e "[65%] \e[32m> Adding UOPZ extention to cli PHP.ini ($PHPINICLIPATH) ...\e[0m"
+	echo "extension = uopz.so" | sudo tee --append  $PHPINICLIPATH
+		
+	RestartService
+}
+
+
+InstallUOPZForPHP7 ()
+{
+	echo -e "[57%] \e[32m> Install UOPZ for PHP7\e[0m"
+	sudo pecl install uopz > /dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo -e "[65%] \e[34m> Automatic Install failed , Installing Manually \e[0m"
+	    #failed try compile it from source
+	    wget http://pecl.php.net/get/uopz-5.0.2.tgz
+		tar -xvf uopz-5.0.2.tgz
+		cd uopz-5.0.2
+		phpize
+		./configure
+		make
+		#make test
+		sudo make install
+		cd ..
+		rm uopz-5.0.2.tgz
+		rm package.xml
+		rm -r uopz-5.0.2
+	fi
+	echo -e "[75%] \e[32m> UOPZ Installed \e[0m"
+}
+
+InstallUOPZForPHP5 ()
+{
+	echo -e "[57%] \e[32m> Install UOPZ for PHP5\e[0m"
+	sudo pecl install uopz-2.0.7 > /dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo -e "[65%] \e[34m> Automatic Install failed , Installing Manually \e[0m"
+	    #failed try compile it from source
+	    wget http://pecl.php.net/get/uopz-2.0.7.tgz
+		tar -xvf uopz-2.0.7.tgz
+		cd uopz-2.0.7
+		phpize
+		./configure
+		make
+		#make test
+		sudo make install
+		cd ..
+		rm uopz-2.0.7.tgz
+		rm package.xml
+		rm -r uopz-2.0.7
+	fi
+
+	echo -e "[75%] \e[32m> UOPZ Installed \e[0m"
+}
+
+
+# restart required services
+RestartService ()
+{
+	echo -e "[80%] \e[32m> get related services \e[0m"
+	PHPFPM_SERVICE=$(service --status-all | grep -o 'php.*')
+
+	nginx -v > /dev/null 2>&1
+	NGINX_IS_INSTALLED=$?
+
+	apache2 -v > /dev/null 2>&1
+	APACHE_IS_INSTALLED=$?
+
+	echo -e "[85%] \e[32m> Restarting related services \e[0m"
+
+	if [ $PHPFPM_SERVICE ]; then
+		echo -e "[90%] \e[32m> Restaring PHP fpm\e[0m"
+		sudo service $PHPFPM_SERVICE restart
+	else
+		echo -e "[90%] \e[32m>  PHP fpm not exists restarting the webserver instead\e[0m"
+		if [ $NGINX_IS_INSTALLED == 0 ]; then
+			echo -e "[95%] \e[32m> Restaring Nginx\e[0m"
+			sudo service nginx restart
+		fi
+		if [ $APACHE_IS_INSTALLED == 0 ]; then
+			echo -e "[95%] \e[32m> Restaring Apache\e[0m"
+			sudo service apache2 restart
+		fi
+		
+	fi
+}
+
+SYSTEM="$(uname -s)"
+OS="$(uname -o)"
+DIST="$(uname -v | grep -o 'Ubuntu')"
+MACHINE="$(uname -m)"
+
+# Determine OS platform
+UNAME=$(uname | tr "[:upper:]" "[:lower:]")
+# If Linux, try to determine specific distribution
+if [ "$UNAME" == "linux" ]; then
+    # If available, use LSB to identify distribution
+    if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+        export DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
+    # Otherwise, use release info file
+    else
+        export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+    fi
+fi
+# For everything else (or if above failed), just use generic identifier
+[ "$DISTRO" == "" ] && export DISTRO=$UNAME
+unset UNAME
+
+
+
+
+echo -e "\e[32m----------------------------------------\e[0m"
+echo -e "\e[32m>>> Shieldfy installation  :   Start    \e[0m"
+echo -e "\e[32m----------------------------------------\e[0m"
+
+echo -e "[1%]  \e[32m> Checking The Operating System \e[0m"
+
+
+
+
+#sudo echo -e "\e[34m>>> Begin Install\e[0m"
+#[ "${UID}" -ne "0" ] && sudo="sudo"
+
+
+if [[ "${OS}" == "GNU/Linux" && "${SYSTEM}" == "Linux" && "${DISTRO}" == "Ubuntu" ]]
+then
+	echo -e "[3%]  \e[32m> [${SYSTEM}] [${OS}] [${DISTRO}] [${MACHINE}] ... OK \e[0m"
+else
+	echo -e "\e[91m"
+	echo -e " Sorry , The platform is Not Supported please Install the dependencies manually "
+	echo -e " Refer to https://docs.shieldfy.io/install_dependencies.html "
+	echo -e "\e[0m"
+fi
+
+
+
+echo -e "[5%]  \e[32m> Checking PHP Version\e[0m"
+
+PHP_VERSION_MAJOR=$(php -r "echo explode('.', PHP_VERSION)[0];")
+PHP_VERSION_MINOR=$(php -r "echo explode('.', PHP_VERSION)[1];")
+PHP_VERSION_RELEASE=$(php -r "echo explode('.', PHP_VERSION)[2];")
+
+echo -e "[10%] \e[32m> PHP $PHP_VERSION_MAJOR.$PHP_VERSION_MINOR.$PHP_VERSION_RELEASE ... OK \e[0m"
+
+
+# check UOPZ 
+echo -e "[11%] \e[32m> Checking UOPZ Extention  \e[0m"
+UOPZ_IS_INSTALLED=$(php -r "echo (extension_loaded('uopz'))?1:0;")
+
+if [ $UOPZ_IS_INSTALLED -eq 1 ]; then
+	echo -e "[90%] \e[32m> UOPZ extention ... OK\e[0m"
+	echo -e "[100%]\e[32m> Install Done \e[0m"
+else
+	echo -e "[13%] \e[34m> UOPZ extention ... Not Installed\e[0m"
+	echo -e "[14%] \e[32m> Installing UOPZ extention ...\e[0m"
+
+	echo -e "\e[34m>>> The installer require sudo password for some operations \e[0m"
+	sudo echo -e "[20%] \e[32m> Begin Install \e[0m"
+	getPHPINIFile
+	InstallDependecies
+	InstallUOPZ
+	echo -e "[100%]\e[32m> Install Done \e[0m"
+fi
+
+echo -e "\e[40;38;5;82m---------------------------------------------------\e[0m"
+echo -e "\e[40;38;5;82m>>> Shieldfy dependencies installation  \u2705 done  \e[0m"
+echo -e "\e[40;38;5;82m>>> now run composer require shieldfy/shieldfy-php \e[0m"
+echo -e "\e[40;38;5;82m---------------------------------------------------\e[0m"

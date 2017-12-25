@@ -58,16 +58,10 @@ class HeadersMonitor extends MonitorBase
 
     public function analyze()
     {
-       // echo 'Hello Ya WAD';
-        // $arg_list = func_get_args();
-        // ddb($arg_list);
-        // exit;
         $arg_list = func_get_args();
         foreach($arg_list as $arg):
-            //get the final query
             if(is_string($arg)) $this->deepAnalyze($arg);
         endforeach;
-        //ddb($arg_list);
     }
 
 
@@ -78,7 +72,6 @@ class HeadersMonitor extends MonitorBase
         $charge = "";
 
         foreach($this->infected as $infected):
-            //echo 'deep'.$arg;echo stripos($arg, $infected['value']);exit;
             if (stripos($arg, $infected['value']) !== false) {
                 $foundGuilty = true;
                 $charge = $infected;
@@ -90,9 +83,7 @@ class HeadersMonitor extends MonitorBase
 
             $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS); 
             $code = $this->collectors['code']->pushStack($stack)->collectFromStack($stack);
-            // print_r($charge);
-            // print_r($code);
-            //echo $this->parseScore($charge['score']);exit;
+            
             $this->sendToJail($this->parseScore($charge['score']), $charge , $code);    
         }
     }

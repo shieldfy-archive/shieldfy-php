@@ -63,7 +63,6 @@ abstract class MonitorBase
 
     }
 
-
     private function set_hook($func, Closure $callback)
     {
        
@@ -74,14 +73,16 @@ abstract class MonitorBase
         uopz_set_hook($func,$callback);
     }
 
+    //TODO: test versions before UOPZ 5
     private function set_function($function, Closure $callback)
     {
 
         //uopz_copy
         $originalFunc = uopz_copy($function);
         uopz_function($function, function() use($originalFunc, $callback) {
-            /* can call original strtotime from here */
+            $args = func_get_args();
             call_user_func_array($callback,$args);
+            /* can call original func from here */
             return call_user_func_array($originalFunc,$args);
         });
     }
@@ -95,32 +96,6 @@ abstract class MonitorBase
      * handle the judgment info
      * @param  array $judgment judgment informatoin
      * @return void
-     *
-     * [
-     *     incident id
-     *     session id
-     *     attacker ip
-     *     attacker info
-     *     request info
-     *     attack info
-     *     url 
-     *     type
-     *     sub type
-     *     rules info
-     *     code stack
-     *     code block
-     * ]
-     * 
-     * 
-     *  charge
-     *  [score] => 50
-     *  [rulesIds] => Array
-     *       (
-     *           [0] => 304
-     *       )
-     *
-     *   [value] => http:/google.com
-     *   [key] => get.url
      */
     
     protected function sendToJail($severity = 'low', $charge  = [], $code = [])
@@ -131,8 +106,6 @@ abstract class MonitorBase
         $incidentId = $this->generateIncidentId($this->collectors['user']->getId());
         
         
-        //print_r($this->dispatcher->getData());
-
         if($this->dispatcher->hasData() && $severity  != 'high'){
             //merge
             $data = $this->dispatcher->getData();
@@ -158,8 +131,6 @@ abstract class MonitorBase
             'code'              => $code,
             'response'          => ($severity == 'high' && $this->config['action'] == 'block') ? 'block' : 'pass'
         ]);
-        //file_put_contents(__DIR__.'/../xxx',print_r($this->dispatcher->getData(),1));
-        
 
         if($severity == 'high' && $this->config['action'] == 'block')
         {

@@ -49,16 +49,11 @@ class RequestMonitor extends MonitorBase
             $request->server['HTTP_HOST'] = 'http://'.$request->server['HTTP_HOST'];
         }
 
-        //echo $request->server['HTTP_ORIGIN'];exit;
-
         $origin = parse_url(trim($request->server['HTTP_ORIGIN']), PHP_URL_HOST);
         $host = parse_url(trim($request->server['HTTP_HOST']), PHP_URL_HOST);
         
-        //echo 'x'.$request->server['HTTP_ORIGIN'];
-        
 
         if (strtolower($origin) !== strtolower($host)) {
-           // echo 'CCCCCCCCCCCCCCCCCCCC';
             //csrf attack found
             //since most of frameworks now uses csrf token & many of endpoint are ajax/api
             //and modern browsers default block violation of origin ( CORS : https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS )

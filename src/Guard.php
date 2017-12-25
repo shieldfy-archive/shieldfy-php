@@ -60,7 +60,6 @@ class Guard
     private function __construct(array $userConfig)
     {
 
-
         //set config container
         $userConfig['version'] = $this->version;
         $this->config = new Config($userConfig);

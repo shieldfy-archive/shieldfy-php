@@ -66,20 +66,34 @@ abstract class MonitorBase
     private function set_hook($func, Closure $callback)
     {
        
+        //class
         if(is_array($func)){
             uopz_set_hook($func[0],$func[1],$callback);
             return;
         }
+
+        //single function
         uopz_set_hook($func,$callback);
     }
 
-    //TODO: test versions before UOPZ 5
-    private function set_function($function, Closure $callback)
+    private function set_function($func, Closure $callback)
     {
 
-        //uopz_copy
-        $originalFunc = uopz_copy($function);
-        uopz_function($function, function() use($originalFunc, $callback) {
+        //class
+        if(is_array($func)){
+            $originalFunc = uopz_copy($func[0],$func[1]);            
+            uopz_function($func[0],$func[1], function() use($originalFunc, $callback) {
+                $args = func_get_args();
+                call_user_func_array($callback,$args);
+                /* can call original func from here */
+                return call_user_func_array($originalFunc,$args);
+            });
+            return;
+        }
+
+        //single function
+        $originalFunc = uopz_copy($func);
+        uopz_function($func, function() use($originalFunc, $callback) {
             $args = func_get_args();
             call_user_func_array($callback,$args);
             /* can call original func from here */

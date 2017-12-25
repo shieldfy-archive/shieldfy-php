@@ -27,7 +27,7 @@ composer require shieldfy/shieldfy-php
 #### PHP Native
 
 ```php
-if(!class_exists(Composer\Autoload\ClassLoader::class)) require_once(__DIR__.'/vendor/autoload.php');
+if(!class_exists(\Composer\Autoload\ClassLoader::class)) require_once(__DIR__.'/vendor/autoload.php');
 
 \Shieldfy\Guard::init([
 	'app_key' 		=> 'YOURAPPKEY',
@@ -36,8 +36,8 @@ if(!class_exists(Composer\Autoload\ClassLoader::class)) require_once(__DIR__.'/v
 ```
 
 #### Laravel Extention (add laravel service provider)
-in config/app.php add ShieldfyServiceProvider to the provider list
-```
+in `config/app.php` add `ShieldfyServiceProvider` to the `providers` list
+```php
 'providers' => [
 	\Shieldfy\Extentions\Laravel\ShieldfyServiceProvider::class
 ]
@@ -45,9 +45,8 @@ in config/app.php add ShieldfyServiceProvider to the provider list
 
 #### CodeIgniter Extention (Add CI Bridge)
 
-```
-
-if(!class_exists(Composer\Autoload\ClassLoader::class)) require_once(__DIR__.'/vendor/autoload.php');
+```php
+if(!class_exists(\Composer\Autoload\ClassLoader::class)) require_once(__DIR__.'/vendor/autoload.php');
 
 $guard = \Shieldfy\Guard::init([
 	'app_key' 		=> 'YOURAPPKEY',
@@ -61,28 +60,19 @@ $CI =& get_instance();
 
 #### Symfony Extention ()
 
-```
-
-```
+TBD 
 
 #### CakePHP
 
-```
-
-```
+TBD 
 
 #### ZendPHP
 
-```
-
-```
+TBD 
 
 #### Yii PHP
 
-```
-
-```
-
+TBD
 
 ## Configurations
 
@@ -96,7 +86,7 @@ TBD
 
 ## Testing Environment
 
-```
+```bash
 cd Example
 php -S localhost:8080
 ```

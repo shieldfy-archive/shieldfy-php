@@ -109,7 +109,6 @@ class ApiClient implements Exceptionable
      */
     public function parseResult($result)
     {
-       print_r($result);
         $res = json_decode($result);
         if (!$res) {
             $this->errors = [

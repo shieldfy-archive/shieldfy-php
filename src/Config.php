@@ -60,6 +60,7 @@ class Config implements ArrayAccess
     {
 
         // -- first method --
+        // 
         //search stack for find original folder from composer folder
         $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS); 
         foreach($stack as $frame)
@@ -69,20 +70,21 @@ class Config implements ArrayAccess
                 break;
             }
         }
-        if(file_exists($baseDirectory1.DIRECTORY_SEPARATOR.'shieldfy.json')){
+
+        if(isset($baseDirectory1) && file_exists($baseDirectory1.DIRECTORY_SEPARATOR.'composer.json')){
             return $baseDirectory1;
         }
 
         // -- second method --
         $firstFrame = $stack[count($stack) - 1];
         $baseDirectory2 = dirname($firstFrame['file']);
-        if(file_exists($baseDirectory2.DIRECTORY_SEPARATOR.'shieldfy.json')){
+        if(file_exists($baseDirectory2.DIRECTORY_SEPARATOR.'composer.json')){
             return $baseDirectory2;
         }
 
         // -- third method --
         $baseDirectory3 =  realpath($baseDirectory2.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
-        if(file_exists($baseDirectory3.DIRECTORY_SEPARATOR.'shieldfy.json')){
+        if(file_exists($baseDirectory3.DIRECTORY_SEPARATOR.'composer.json')){
             return $baseDirectory3;
         }
 

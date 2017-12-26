@@ -32,14 +32,14 @@
         "squizlabs/php_codesniffer": "^2.3"
     },
     "autoload": {
-        "files": [
-            "src/Loader.php"
-        ],
         "psr-4": {
             "Shieldfy\\": "src"
         }
     },
     "autoload-dev": {
+        "files": [
+            "src/Helper.php"
+        ],
         "psr-4": {
             "Shieldfy\\": "tests"
         }

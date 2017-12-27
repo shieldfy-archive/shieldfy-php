@@ -83,7 +83,6 @@ class Guard
         //check the installation
         if (!$this->isInstalled()) {
             $install = (new Installer($this->collectors['request'], $this->dispatcher, $this->config))->run();
-            
         }
 
         //start shieldfy guard

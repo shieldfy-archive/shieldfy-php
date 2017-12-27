@@ -22,7 +22,8 @@ class MonitorsBag
         'ExecutionMonitor'          =>    \Shieldfy\Monitors\ExecutionMonitor::class,
         'MemoryMonitor'             =>    \Shieldfy\Monitors\MemoryMonitor::class,
         'ViewMonitor'               =>    \Shieldfy\Monitors\ViewMonitor::class,
-        'ExceptionsMonitor'         =>    \Shieldfy\Monitors\ExceptionsMonitor::class
+        'ExceptionsMonitor'         =>    \Shieldfy\Monitors\ExceptionsMonitor::class,
+        'ThirdPartyMonitor'         =>    \Shieldfy\Monitors\ThirdPartyMonitor::class,
     ];
 
     /**

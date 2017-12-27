@@ -51,8 +51,7 @@ class ViewMonitor extends MonitorBase
     public function deepAnalyze($content)
     {
         $foundGuilty = false;
-        $charge = "";
-
+        $charge = [];
         foreach($this->infected as $infected):
             if (in_array($infected['value'], $this->vaguePhrases)) {
                 continue;
@@ -65,7 +64,7 @@ class ViewMonitor extends MonitorBase
         endforeach;
         
         if($foundGuilty){
-            $code = $this->collectors['code']->collectFromText($content, $value);
+            $code = $this->collectors['code']->collectFromText($content, $charge['value']);
             return $this->sendToJail( $this->parseScore($charge['score']), $charge, $code );
         }
         return $content;

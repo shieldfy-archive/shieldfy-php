@@ -57,7 +57,8 @@ class DBMonitor extends MonitorBase
             ['mysqli','real_query'],    
             //PDO
             ['pdo','exec'],
-            ['pdo','query']
+            ['pdo','query'],
+            ['pdo','prepare']
 
         ],[$this,'analyze']);
 

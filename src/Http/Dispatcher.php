@@ -14,7 +14,15 @@ class Dispatcher implements Exceptionable
     /**
      * @var supported events list
     */
-    private $events = ['install','update', 'session/start', 'session/step', 'session/threat', 'exception'];
+    private $events = [
+        'install',
+        'update', 
+        'session/start', 
+        'session/step', 
+        'session/threat',
+        'security/scan' 
+        'exception'
+    ];
 
     private $data = [];
 
